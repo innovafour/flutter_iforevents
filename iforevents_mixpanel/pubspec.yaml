@@ -1,0 +1,22 @@
+name: iforevents_mixpanel
+description: "A new Flutter package project."
+version: 0.0.1
+homepage: https://github.com/innovafour/flutter_iforevents
+
+environment:
+  sdk: ^3.8.1
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  iforevents:
+    git:
+      url: https://github.com/innovafour/flutter_iforevents
+      ref: main
+  mixpanel_flutter: ^2.4.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
