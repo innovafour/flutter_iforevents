@@ -3,9 +3,7 @@ import 'package:flutter/widgets.dart';
 
 class IforeventsRouteObserver extends RouteObserver<PageRoute<dynamic>> {
   final Iforevents iforevents;
-  IforeventsRouteObserver({
-    required this.iforevents,
-  });
+  IforeventsRouteObserver({required this.iforevents});
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
@@ -35,10 +33,7 @@ class IforeventsRouteObserver extends RouteObserver<PageRoute<dynamic>> {
     RouteSettings? to,
   }) {
     try {
-      iforevents.screen(
-        toRoute: to,
-        previousRoute: from,
-      );
+      iforevents.screen(toRoute: to, previousRoute: from);
     } catch (_) {}
   }
 }

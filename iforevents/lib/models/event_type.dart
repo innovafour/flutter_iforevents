@@ -1,10 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum EventType {
-  track,
-  screen,
-  alias;
-}
+enum EventType { track, screen, alias }
 
 class TrackEvent extends Equatable {
   const TrackEvent({
@@ -31,10 +27,6 @@ class TrackEvent extends Equatable {
 
   @override
   List<Object?> get props {
-    return [
-      eventName,
-      eventType,
-      properties,
-    ];
+    return [eventName, eventType, properties];
   }
 }

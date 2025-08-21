@@ -1,7 +1,6 @@
 import 'package:iforevents/models/event_type.dart';
+import 'package:iforevents/models/integration.dart';
 import 'package:mixpanel_flutter/mixpanel_flutter.dart';
-
-import '_integration.dart';
 
 class MixpanelIntegration extends Integration {
   const MixpanelIntegration();
@@ -14,10 +13,7 @@ class MixpanelIntegration extends Integration {
     String key = '',
     Map<String, dynamic> config = const {},
   }) async {
-    mixpanel = await Mixpanel.init(
-      key,
-      trackAutomaticEvents: false,
-    );
+    mixpanel = await Mixpanel.init(key, trackAutomaticEvents: false);
 
     people = mixpanel?.getPeople();
 
