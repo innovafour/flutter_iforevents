@@ -1,9 +1,9 @@
-# IforEvents - Core Package
+# IForEvents - Core Package
 
 [![pub package](https://img.shields.io/pub/v/iforevents.svg)](https://pub.dev/packages/iforevents)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A comprehensive Flutter package for event tracking and analytics integration. IforEvents provides a unified interface for multiple analytics platforms while automatically collecting device information and user data.
+A comprehensive Flutter package for event tracking and analytics integration. IForEvents provides a unified interface for multiple analytics platforms while automatically collecting device information and user data.
 
 ## Features
 
@@ -21,6 +21,7 @@ A comprehensive Flutter package for event tracking and analytics integration. If
 
 | Integration | Package | Description | Native Config Required |
 |-------------|---------|-------------|------------------------|
+| IForevents API | `iforevents` | Native integration with the IForevents backend | ❌ No |
 | Firebase Analytics | `iforevents_firebase` | Google Firebase Analytics integration | ✅ Yes |
 | Mixpanel | `iforevents_mixpanel` | Mixpanel analytics integration | ❌ No |
 | Algolia Insights | `iforevents_algolia` | Algolia search analytics integration | ❌ No |

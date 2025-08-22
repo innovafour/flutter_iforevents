@@ -1,9 +1,9 @@
-# IforEvents Mixpanel Integration
+# IForEvents Mixpanel Integration
 
 [![pub package](https://img.shields.io/pub/v/iforevents_mixpanel.svg)](https://pub.dev/packages/iforevents_mixpanel)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Mixpanel analytics integration for IforEvents. This package provides seamless integration with Mixpanel's powerful analytics platform, enabling you to track user behavior, events, and create detailed user profiles.
+Mixpanel analytics integration for IForEvents. This package provides seamless integration with Mixpanel's powerful analytics platform, enabling you to track user behavior, events, and create detailed user profiles.
 
 ## Features
 

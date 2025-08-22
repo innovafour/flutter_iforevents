@@ -1,9 +1,9 @@
-# IforEvents Firebase Integration
+# IForEvents Firebase Integration
 
 [![pub package](https://img.shields.io/pub/v/iforevents_firebase.svg)](https://pub.dev/packages/iforevents_firebase)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Firebase Analytics integration for IforEvents. This package provides seamless integration with Google Firebase Analytics, allowing you to track user events, identify users, and monitor app usage through Firebase's powerful analytics platform.
+Firebase Analytics integration for IForEvents. This package provides seamless integration with Google Firebase Analytics, allowing you to track user events, identify users, and monitor app usage through Firebase's powerful analytics platform.
 
 ## Features
 

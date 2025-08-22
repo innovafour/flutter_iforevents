@@ -15,7 +15,7 @@ Thank you for your interest in contributing to IforEvents! We welcome contributi
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by our Code of Conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to [support@innovafour.com](mailto:support@innovafour.com).
+This project and everyone participating in it is governed by our Code of Conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to [innovafour@innovafour.com](mailto:innovafour@innovafour.com).
 
 ### Our Standards
 
@@ -347,7 +347,7 @@ Releases are handled by maintainers. The process includes:
 
 ## Getting Help
 
-- 📧 Email: [support@innovafour.com](mailto:support@innovafour.com)
+- 📧 Email: [innovafour@innovafour.com](mailto:innovafour@innovafour.com)
 - 💬 Discussions: [GitHub Discussions](https://github.com/innovafour/flutter_iforevents/discussions)
 - 🐛 Issues: [GitHub Issues](https://github.com/innovafour/flutter_iforevents/issues)
 

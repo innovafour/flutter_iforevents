@@ -214,7 +214,7 @@ After exploring this example:
 
 ## Support
 
-- 📧 **Email**: [support@innovafour.com](mailto:support@innovafour.com)
+- 📧 **Email**: [innovafour@innovafour.com](mailto:innovafour@innovafour.com)
 - 📖 **Documentation**: Check the main package README
 - 🐛 **Issues**: [GitHub Issues](https://github.com/innovafour/flutter_iforevents/issues)
 

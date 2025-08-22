@@ -1,9 +1,9 @@
-# IforEvents Meta (Facebook) Integration
+# IForEvents Meta (Facebook) Integration
 
 [![pub package](https://img.shields.io/pub/v/iforevents_meta.svg)](https://pub.dev/packages/iforevents_meta)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Meta (Facebook) App Events integration for IforEvents. This package provides seamless integration with Facebook Analytics and Meta's advertising platform, enabling you to track user events, measure ad campaign effectiveness, and optimize your Facebook marketing efforts.
+Meta (Facebook) App Events integration for IForEvents. This package provides seamless integration with Facebook Analytics and Meta's advertising platform, enabling you to track user events, measure ad campaign effectiveness, and optimize your Facebook marketing efforts.
 
 ## Features
 

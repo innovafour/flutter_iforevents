@@ -1,9 +1,9 @@
-# IforEvents Algolia Integration
+# IForEvents Algolia Integration
 
 [![pub package](https://img.shields.io/pub/v/iforevents_algolia.svg)](https://pub.dev/packages/iforevents_algolia)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Algolia Insights integration for IforEvents. This package provides seamless integration with Algolia's search analytics platform, enabling you to track search events, user interactions, and optimize your search experience through detailed analytics.
+Algolia Insights integration for IForEvents. This package provides seamless integration with Algolia's search analytics platform, enabling you to track search events, user interactions, and optimize your search experience through detailed analytics.
 
 ## Features
 

@@ -1,9 +1,9 @@
-# IforEvents CleverTap Integration
+# IForEvents CleverTap Integration
 
 [![pub package](https://img.shields.io/pub/v/iforevents_clevertap.svg)](https://pub.dev/packages/iforevents_clevertap)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-CleverTap analytics integration for IforEvents. This package provides seamless integration with CleverTap's customer engagement platform, enabling you to track user events, create detailed user profiles, and trigger personalized campaigns.
+CleverTap analytics integration for IForEvents. This package provides seamless integration with CleverTap's customer engagement platform, enabling you to track user events, create detailed user profiles, and trigger personalized campaigns.
 
 ## Features
 
