@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:android_id/android_id.dart';
@@ -6,9 +7,14 @@ import 'package:dart_ipify/dart_ipify.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:iforevents/integration/_integration.dart';
 import 'package:iforevents/models/device.dart';
+import 'package:iforevents/models/pending_event.dart';
+import 'package:iforevents/services/event_storage_service.dart';
+import 'package:iforevents/services/background_processor.dart';
+import 'package:iforevents/config/retry_config.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 export 'package:iforevents/integration/_integration.dart';
+export 'package:iforevents/integration/iforevents.dart';
 
 /// A class for managing mobile shared events.
 class Iforevents {
@@ -17,17 +23,49 @@ class Iforevents {
 
   static Map<String, dynamic> _identifyData = {};
   static Device? _deviceData;
+  static bool _isInitialized = false;
+
+  /// Configurable retry intervals
+  static List<int> get retryIntervals => RetryConfig.retryIntervals;
 
   Future<void> init({List<Integration> integrations = const []}) async {
     try {
-      await IntegrationFactory.init(integrations: integrations);
+      // Initialize local storage service
+      await EventStorageService.init();
+
+      // Set callback to process pending events
+      EventStorageService.setRetryCallback(_processRetryEvents);
+
+      // Start background processing
+      BackgroundProcessor.startBackgroundProcessing();
+
+      // Initialize integrations
+      final results = await IntegrationFactory.init(integrations: integrations);
+
+      // Log initialization results
+      for (final result in results) {
+        if (!result.success) {
+          log('Error initializing ${result.integrationName}: ${result.error}');
+        }
+      }
+
+      _isInitialized = true;
+      log(
+        'EventStorageService and BackgroundProcessor initialized successfully',
+      );
     } catch (e) {
+      log('Error initializing Iforevents: $e');
       return;
     }
   }
 
   Future<void> identify({required IdentifyEvent event}) async {
     if (event.customID.isEmpty) return;
+    if (!_isInitialized) {
+      log('Iforevents is not initialized. Call init() first.');
+      return;
+    }
+
     final device = await deviceData;
 
     final data = {
@@ -41,39 +79,94 @@ class Iforevents {
       ...event.properties,
     };
 
-    await IntegrationFactory.identify(
+    final results = await IntegrationFactory.identify(
       customID: event.customID,
       identifyData: data,
+    );
+
+    // Process results and handle failures
+    await _handleIntegrationResults(
+      results,
+      PendingEvent.fromIdentifyEvent(
+        event.copyWith(properties: data),
+        'base_event', // Will be updated with the real integration name in _handleIntegrationResults
+        retryIntervalSeconds: retryIntervals[0],
+      ),
     );
 
     _identifyData = data;
   }
 
-  void track({required TrackEvent event}) async {
+  Future<void> track({required TrackEvent event}) async {
     try {
-      final tempData = {..._identifyData, ...event.properties};
+      if (!_isInitialized) {
+        log('Iforevents is not initialized. Call init() first.');
+        return;
+      }
 
-      await IntegrationFactory.track(
-        event: event.copyWith(properties: flattenMap(tempData)),
+      final tempData = {..._identifyData, ...event.properties};
+      final processedEvent = event.copyWith(properties: flattenMap(tempData));
+
+      final results = await IntegrationFactory.track(event: processedEvent);
+
+      // Process results and handle failures
+      await _handleIntegrationResults(
+        results,
+        PendingEvent.fromTrackEvent(
+          processedEvent,
+          'base_event', // Will be updated with the real integration name in _handleIntegrationResults
+          retryIntervalSeconds: retryIntervals[0],
+        ),
       );
     } catch (e) {
+      log('Error in track: $e');
       return;
     }
   }
 
   Future<void> reset() async {
     try {
-      await IntegrationFactory.reset();
+      if (!_isInitialized) {
+        log('Iforevents is not initialized. Call init() first.');
+        return;
+      }
+
+      final results = await IntegrationFactory.reset();
+
+      // Log errors if any
+      for (final result in results) {
+        if (!result.success) {
+          log('Error resetting ${result.integrationName}: ${result.error}');
+        }
+      }
+
       _identifyData = {};
     } catch (e) {
+      log('Error in reset: $e');
       return;
     }
   }
 
   Future<void> pageViewed({required PageViewEvent event}) async {
     try {
-      await IntegrationFactory.pageViewed(event: event);
+      if (!_isInitialized) {
+        log('Iforevents is not initialized. Call init() first.');
+        return;
+      }
+
+      final results = await IntegrationFactory.pageViewed(event: event);
+
+      // Process results and handle failures
+      await _handleIntegrationResults(
+        results,
+        PendingEvent.fromPageViewEvent(
+          event,
+          'base_event', // Will be updated with the real integration name in _handleIntegrationResults
+          retryIntervalSeconds: retryIntervals[0],
+        ),
+      );
     } catch (e) {
+      log('Error in pageViewed: $e');
       return;
     }
   }
@@ -214,6 +307,196 @@ class Iforevents {
     });
 
     return result;
+  }
+
+  /// Handles integration results and saves failed events
+  static Future<void> _handleIntegrationResults(
+    List<IntegrationResult> results,
+    PendingEvent baseEvent,
+  ) async {
+    for (final result in results) {
+      if (result.success) {
+        log('Event successfully sent to ${result.integrationName}');
+      } else {
+        log(
+          'Error sending event to ${result.integrationName}: ${result.error}',
+        );
+
+        // Create specific pending event for this integration
+        final pendingEvent = baseEvent.copyWith(
+          id: '${baseEvent.id}_${result.integrationName}',
+          integrationName: result.integrationName,
+        );
+
+        // Save failed event for retry
+        await EventStorageService.savePendingEvent(pendingEvent);
+      }
+    }
+  }
+
+  /// Processes pending events for retry
+  static Future<void> _processRetryEvents(List<PendingEvent> events) async {
+    if (!_isInitialized) return;
+
+    log('Processing ${events.length} events for retry');
+
+    for (final event in events) {
+      try {
+        IntegrationResult? result;
+
+        // Execute the event according to its type in the specific integration
+        switch (event.eventType) {
+          case PendingEventType.track:
+            final trackEvent = event.toOriginalEvent() as TrackEvent;
+            result = await IntegrationFactory.executeSpecificIntegration(
+              event.integrationName,
+              (integration) => integration.track(event: trackEvent),
+            );
+            break;
+
+          case PendingEventType.identify:
+            final identifyEvent = event.toOriginalEvent() as IdentifyEvent;
+            result = await IntegrationFactory.executeSpecificIntegration(
+              event.integrationName,
+              (integration) => integration.identify(event: identifyEvent),
+            );
+            break;
+
+          case PendingEventType.pageView:
+            final pageViewEvent = event.toOriginalEvent() as PageViewEvent;
+            result = await IntegrationFactory.executeSpecificIntegration(
+              event.integrationName,
+              (integration) => integration.pageView(event: pageViewEvent),
+            );
+            break;
+        }
+
+        if (result != null) {
+          if (result.success) {
+            // Successful event, remove from database
+            await EventStorageService.removeSuccessfulEvent(event.id);
+            log('Event resent successfully: ${event.id}');
+          } else {
+            // Event failed, update attempt counter
+            await EventStorageService.updateEventAttempt(event.id);
+            log(
+              'Retry failed for event: ${event.id} (${event.attemptCount + 1}/3)',
+            );
+          }
+        } else {
+          log('Integration not found for event: ${event.id}');
+          await EventStorageService.updateEventAttempt(event.id);
+        }
+      } catch (e) {
+        log('Error processing retry event ${event.id}: $e');
+        await EventStorageService.updateEventAttempt(event.id);
+      }
+    }
+  }
+
+  /// Gets statistics of pending events
+  static Map<String, int> getPendingEventsStats() {
+    return EventStorageService.getPendingEventsByIntegration();
+  }
+
+  /// Gets the total number of pending events
+  static int getPendingEventsCount() {
+    return EventStorageService.getPendingEventsCount();
+  }
+
+  /// Sets custom retry intervals
+  static bool setRetryIntervals(List<int> intervals) {
+    final success = RetryConfig.setRetryIntervals(intervals);
+    if (success) {
+      log('Retry intervals updated: $intervals seconds');
+    } else {
+      log(
+        'Error: Invalid retry intervals. Must be 3 values between ${RetryConfig.minimumRetryInterval} and ${RetryConfig.maximumRetryInterval} seconds',
+      );
+    }
+    return success;
+  }
+
+  /// Applies a preset configuration of intervals
+  static bool applyRetryPreset(String presetName) {
+    final success = RetryConfig.applyPresetConfiguration(presetName);
+    if (success) {
+      log(
+        'Preset configuration "$presetName" applied: ${RetryConfig.retryIntervals}',
+      );
+    } else {
+      log('Error: Preset configuration "$presetName" not found');
+    }
+    return success;
+  }
+
+  /// Gets available preset configurations
+  static List<String> getAvailableRetryPresets() {
+    return RetryConfig.availablePresets;
+  }
+
+  /// Gets the full current configuration
+  static Map<String, dynamic> getCurrentConfiguration() {
+    return RetryConfig.toMap();
+  }
+
+  /// Restores configuration to defaults
+  static void resetConfigurationToDefaults() {
+    RetryConfig.resetToDefaults();
+    log('Configuration restored to default values');
+  }
+
+  /// Clears all pending events (useful for testing)
+  static Future<void> clearPendingEvents() async {
+    await EventStorageService.clearAllPendingEvents();
+  }
+
+  /// Gets background processor statistics
+  static Map<String, dynamic> getBackgroundProcessorStats() {
+    return BackgroundProcessor.getProcessorStats();
+  }
+
+  /// Sets the background processing interval
+  static bool setBackgroundProcessingInterval(int seconds) {
+    final configSuccess = RetryConfig.setBackgroundProcessingInterval(seconds);
+    if (configSuccess) {
+      BackgroundProcessor.setProcessingInterval(seconds);
+      log('Background processing interval updated: $seconds seconds');
+    } else {
+      log(
+        'Error: Invalid interval. Must be between ${RetryConfig.minimumRetryInterval} and ${RetryConfig.maximumRetryInterval} seconds',
+      );
+    }
+    return configSuccess;
+  }
+
+  /// Starts background processing manually
+  static void startBackgroundProcessing({int intervalSeconds = 30}) {
+    BackgroundProcessor.startBackgroundProcessing(
+      intervalSeconds: intervalSeconds,
+    );
+  }
+
+  /// Stops background processing
+  static void stopBackgroundProcessing() {
+    BackgroundProcessor.stopBackgroundProcessing();
+  }
+
+  /// Processes pending events immediately
+  static Future<void> processEventsNow() async {
+    await BackgroundProcessor.processEventsNow();
+  }
+
+  /// Processes a specific event for retry (public method)
+  static Future<void> processRetryEvent(PendingEvent event) async {
+    await _processRetryEvents([event]);
+  }
+
+  /// Closes the event service (call when closing the app)
+  static Future<void> dispose() async {
+    BackgroundProcessor.stopBackgroundProcessing();
+    await EventStorageService.close();
+    _isInitialized = false;
   }
 }
 

@@ -1,6 +1,8 @@
+// ignore_for_file: unused_local_variable
+
 import 'package:flutter/material.dart';
 import 'package:iforevents/iforevents.dart';
-import 'package:iforevents/integration/iforevents.dart';
+import 'package:iforevents/models/iforevents_api_config.dart';
 
 /// Ejemplo completo de uso de la integración IForevents API
 ///
@@ -16,6 +18,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -26,8 +30,10 @@ class MyApp extends StatelessWidget {
 }
 
 class IForeventsExample extends StatefulWidget {
+  const IForeventsExample({super.key});
+
   @override
-  _IForeventsExampleState createState() => _IForeventsExampleState();
+  State<IForeventsExample> createState() => _IForeventsExampleState();
 }
 
 class _IForeventsExampleState extends State<IForeventsExample> {
@@ -45,16 +51,7 @@ class _IForeventsExampleState extends State<IForeventsExample> {
 
   /// Configuración de IForevents con diferentes ejemplos de configuración
   Future<void> _setupIForevents() async {
-    // Ejemplo 1: Configuración básica (recomendada para producción)
-    final basicConfig = IForeventsAPIConfig(
-      projectKey: 'your-project-key',
-      projectSecret: 'your-project-secret',
-      baseUrl: 'https://your-api-domain.com',
-      batchSize: 10, // Enviar en lotes de 10 eventos
-      enableLogging: false, // Desactivar logs en producción
-    );
-
-    // Ejemplo 2: Configuración para desarrollo/debug
+    // Ejemplo 1: Configuración para desarrollo/debug
     final debugConfig = IForeventsAPIConfig(
       projectKey: 'your-project-key',
       projectSecret: 'your-project-secret',
@@ -65,6 +62,15 @@ class _IForeventsExampleState extends State<IForeventsExample> {
       throwOnError: true, // Lanzar excepciones para debugging
       enableRetry: true,
       maxRetries: 2,
+    );
+
+    // Ejemplo 2: Configuración básica (recomendada para producción)
+    final basicConfig = IForeventsAPIConfig(
+      projectKey: 'your-project-key',
+      projectSecret: 'your-project-secret',
+      baseUrl: 'https://your-api-domain.com',
+      batchSize: 10, // Enviar en lotes de 10 eventos
+      enableLogging: false, // Desactivar logs en producción
     );
 
     // Ejemplo 3: Configuración para envío inmediato (sin batching)
@@ -314,40 +320,40 @@ class _IForeventsExampleState extends State<IForeventsExample> {
 
                   ElevatedButton(
                     onPressed: _identifyUser,
-                    child: Text('1. Identificar Usuario'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                     ),
+                    child: Text('1. Identificar Usuario'),
                   ),
 
                   SizedBox(height: 8),
 
                   ElevatedButton(
                     onPressed: _trackSingleEvent,
-                    child: Text('2. Enviar Evento Individual'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                     ),
+                    child: Text('2. Enviar Evento Individual'),
                   ),
 
                   SizedBox(height: 8),
 
                   ElevatedButton(
                     onPressed: _trackMultipleEvents,
-                    child: Text('3. Enviar Múltiples Eventos (Batch Test)'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                     ),
+                    child: Text('3. Enviar Múltiples Eventos (Batch Test)'),
                   ),
 
                   SizedBox(height: 8),
 
                   ElevatedButton(
                     onPressed: _trackPageView,
-                    child: Text('4. Track Page View'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.purple,
                     ),
+                    child: Text('4. Track Page View'),
                   ),
 
                   SizedBox(height: 16),
@@ -360,30 +366,30 @@ class _IForeventsExampleState extends State<IForeventsExample> {
 
                   ElevatedButton(
                     onPressed: _flushQueue,
-                    child: Text('Vaciar Cola Manualmente'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.amber,
                     ),
+                    child: Text('Vaciar Cola Manualmente'),
                   ),
 
                   SizedBox(height: 8),
 
                   ElevatedButton(
                     onPressed: _resetIntegration,
-                    child: Text('Reset Integración'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                     ),
+                    child: Text('Reset Integración'),
                   ),
 
                   SizedBox(height: 8),
 
                   ElevatedButton(
                     onPressed: _updateQueueStatus,
-                    child: Text('Actualizar Estado'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.grey,
                     ),
+                    child: Text('Actualizar Estado'),
                   ),
 
                   SizedBox(height: 32),
