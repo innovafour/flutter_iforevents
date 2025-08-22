@@ -3,8 +3,6 @@ description: "A new Flutter package project."
 version: 0.0.1
 homepage: https://github.com/innovafour/flutter_iforevents
 
-resolution: workspace
-
 environment:
   sdk: ^3.8.1
   flutter: ">=1.17.0"
@@ -12,11 +10,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  iforevents:
-    git:
-      url: https://github.com/innovafour/flutter_iforevents
-      ref: main
   mixpanel_flutter: ^2.4.4
+  iforevents:
+    path: ../iforevents
 
 dev_dependencies:
   flutter_test:

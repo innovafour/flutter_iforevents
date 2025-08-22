@@ -12,9 +12,7 @@ dependencies:
     sdk: flutter
   algolia_insights: ^1.0.3
   iforevents:
-    git:
-      url: https://github.com/innovafour/flutter_iforevents
-      ref: main
+    path: ../iforevents
 
 dev_dependencies:
   flutter_test:

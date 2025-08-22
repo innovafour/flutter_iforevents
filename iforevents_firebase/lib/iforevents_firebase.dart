@@ -1,9 +1,13 @@
-import 'package:iforevents/models/event.dart';
 import 'package:iforevents/models/integration.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 
 class FirebaseIntegration extends Integration {
-  const FirebaseIntegration();
+  const FirebaseIntegration({
+    super.onInit,
+    super.onIdentify,
+    super.onTrack,
+    super.onReset,
+  });
 
   static final firebaseAnalytics = FirebaseAnalytics.instance;
 
@@ -13,37 +17,32 @@ class FirebaseIntegration extends Integration {
   }
 
   @override
-  Future<void> identify({
-    required String id,
-    required Map<String, dynamic> data,
-    bool isTheFirstTime = false,
-  }) async {
+  Future<void> identify({required IdentifyEvent event}) async {
     await firebaseAnalytics.setUserId(
-      id: id,
+      id: event.customID,
       callOptions: AnalyticsCallOptions(global: true),
     );
 
-    for (final key in data.keys) {
-      firebaseAnalytics.setUserProperty(name: key, value: data[key].toString());
+    for (final key in event.properties.keys) {
+      firebaseAnalytics.setUserProperty(
+        name: key,
+        value: event.properties[key].toString(),
+      );
     }
   }
 
   @override
-  Future<void> track({
-    required String eventName,
-    EventType eventType = EventType.track,
-    Map<String, dynamic> properties = const {},
-  }) async {
+  Future<void> track({required TrackEvent event}) async {
     final eventProperties = <String, String>{};
 
-    for (final key in properties.keys) {
-      final value = properties[key];
+    for (final key in event.properties.keys) {
+      final value = event.properties[key];
 
       eventProperties[key] = value.toString();
     }
 
     await firebaseAnalytics.logEvent(
-      name: eventName,
+      name: event.eventName,
       parameters: eventProperties,
     );
   }

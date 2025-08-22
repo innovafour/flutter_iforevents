@@ -6,9 +6,10 @@ import 'package:dart_ipify/dart_ipify.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:iforevents/integration/_integration.dart';
 import 'package:iforevents/models/device.dart';
-import 'package:iforevents/models/event.dart';
 import 'package:flutter/widgets.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+
+export 'package:iforevents/integration/_integration.dart';
 
 /// A class for managing mobile shared events.
 class Iforevents {
@@ -26,14 +27,11 @@ class Iforevents {
     }
   }
 
-  Future<void> identify({
-    required String id,
-    required Map<String, dynamic> data,
-  }) async {
-    if (id.isEmpty) return;
+  Future<void> identify({required IdentifyEvent event}) async {
+    if (event.customID.isEmpty) return;
     final device = await deviceData;
 
-    data = {
+    final data = {
       'ip': await ip,
       'device_ip': device.ip,
       'device_brand': device.brand,
@@ -41,26 +39,23 @@ class Iforevents {
       'device_os_version': device.osVersion,
       'device_app_version': device.appVersion,
       'device_platform': device.platform,
-      ...data,
+      ...event.properties,
     };
 
-    await IntegrationFactory.identify(id: id, identifyData: data);
+    await IntegrationFactory.identify(
+      customID: event.customID,
+      identifyData: data,
+    );
 
     _identifyData = data;
   }
 
-  void track({
-    required String eventName,
-    EventType eventType = EventType.track,
-    Map<String, dynamic> properties = const {},
-  }) async {
+  void track({required TrackEvent event}) async {
     try {
-      final tempData = {..._identifyData, ...properties};
+      final tempData = {..._identifyData, ...event.properties};
 
       await IntegrationFactory.track(
-        eventName: eventName,
-        eventType: eventType,
-        properties: tempData,
+        event: event.copyWith(properties: flattenMap(tempData)),
       );
     } catch (e) {
       return;

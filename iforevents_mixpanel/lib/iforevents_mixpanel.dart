@@ -1,18 +1,24 @@
-import 'package:iforevents/models/event.dart';
 import 'package:iforevents/models/integration.dart';
 import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 
 class MixpanelIntegration extends Integration {
-  const MixpanelIntegration({required this.key});
+  const MixpanelIntegration({
+    /// Mixpanel project token
+    required this.token,
+    super.onInit,
+    super.onIdentify,
+    super.onTrack,
+    super.onReset,
+  });
 
-  final String key;
+  final String token;
 
   static Mixpanel? mixpanel;
   static People? people;
 
   @override
   Future<void> init() async {
-    mixpanel = await Mixpanel.init(key, trackAutomaticEvents: false);
+    mixpanel = await Mixpanel.init(token, trackAutomaticEvents: false);
 
     people = mixpanel?.getPeople();
 
@@ -20,23 +26,20 @@ class MixpanelIntegration extends Integration {
   }
 
   @override
-  Future<void> identify({
-    required String id,
-    required Map<String, dynamic> data,
-  }) async {
+  Future<void> identify({required IdentifyEvent event}) async {
     people?.deleteUser();
     await mixpanel?.clearSuperProperties();
 
     final currentDistinctID = await mixpanel?.getDistinctId() ?? '';
 
-    mixpanel?.alias(id, currentDistinctID);
-    await mixpanel?.identify(id);
+    mixpanel?.alias(event.customID, currentDistinctID);
+    await mixpanel?.identify(event.customID);
 
     people = mixpanel?.getPeople();
 
     const unknown = 'unknown';
 
-    final customData = {...data};
+    final customData = {...event.properties};
 
     for (final key in customData.keys) {
       final value = customData[key];
@@ -55,14 +58,10 @@ class MixpanelIntegration extends Integration {
   }
 
   @override
-  Future<void> track({
-    required String eventName,
-    EventType eventType = EventType.track,
-    Map<String, dynamic> properties = const {},
-  }) async {
+  Future<void> track({required TrackEvent event}) async {
     await mixpanel?.track(
-      eventName,
-      properties: properties.map((key, value) {
+      event.eventName,
+      properties: event.properties.map((key, value) {
         if (value == null || value == '') {
           return MapEntry(key, 'unknown');
         }

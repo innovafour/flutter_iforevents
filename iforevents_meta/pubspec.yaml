@@ -1,0 +1,20 @@
+name: iforevents_meta
+description: "A new Flutter package project."
+version: 0.0.1
+homepage: https://github.com/innovafour/flutter_iforevents
+
+environment:
+  sdk: ^3.8.1
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  facebook_app_events: ^0.20.1
+  iforevents:
+    path: ../iforevents
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0

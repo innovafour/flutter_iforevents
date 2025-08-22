@@ -1,32 +1,37 @@
 import 'package:algolia_insights/algolia_insights.dart';
+import 'package:iforevents/models/integration.dart';
 
-class AlgoliaIntegration extends Integration {
-  const AlgoliaIntegration();
+class AlgoliaIntegration extends Integration<Insights> {
+  const AlgoliaIntegration({
+    required this.applicationID,
+    required this.apiKey,
+    super.onInit,
+    super.onIdentify,
+    super.onTrack,
+    super.onReset,
+  });
+
+  final String applicationID;
+  final String apiKey;
 
   static Insights? insights;
 
   @override
-  Future<void> init({
-    String key = '',
-    Map<String, dynamic> config = const {},
-  }) async {
-    final applicationID = config['application_id'];
-
-    if (applicationID == null) {
+  Future<void> init() async {
+    if (applicationID.isEmpty) {
       throw Exception('Algolia application_id is required');
     }
 
-    insights = Insights(apiKey: key, applicationID: applicationID);
+    if (apiKey.isEmpty) {
+      throw Exception('Algolia api_key is required');
+    }
+
+    insights = Insights(apiKey: apiKey, applicationID: applicationID);
   }
 
   @override
-  Future<void> identify({
-    required String userID,
-    required Map<String, dynamic> data,
-    required DeviceData deviceData,
-    bool isTheFirstTime = false,
-  }) async {
-    insights?.userToken = userID;
+  Future<void> identify({required IdentifyEvent event}) async {
+    insights?.userToken = event.customID;
   }
 
   @override

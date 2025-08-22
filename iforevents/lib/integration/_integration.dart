@@ -1,4 +1,3 @@
-import 'package:iforevents/models/event.dart';
 import 'package:iforevents/models/integration.dart';
 import 'package:flutter/widgets.dart';
 
@@ -18,14 +17,16 @@ class IntegrationFactory {
   }
 
   static Future<void> identify({
-    required String id,
+    required String customID,
     required Map<String, dynamic> identifyData,
   }) async {
     final awaitables = <Future>[];
     for (final integration in integrations) {
       awaitables.add(
         safeExecute(
-          () => integration.identify(id: id, data: identifyData),
+          () => integration.identify(
+            event: IdentifyEvent(customID: customID, properties: identifyData),
+          ),
           integration,
         ),
       );
@@ -34,22 +35,11 @@ class IntegrationFactory {
     await Future.wait(awaitables);
   }
 
-  static Future<void> track({
-    required String eventName,
-    EventType eventType = EventType.track,
-    Map<String, dynamic> properties = const {},
-  }) async {
+  static Future<void> track({required TrackEvent event}) async {
     final awaitables = <Future>[];
     for (final integration in integrations) {
       awaitables.add(
-        safeExecute(
-          () => integration.track(
-            eventName: eventName,
-            eventType: eventType,
-            properties: properties,
-          ),
-          integration,
-        ),
+        safeExecute(() => integration.track(event: event), integration),
       );
     }
 
