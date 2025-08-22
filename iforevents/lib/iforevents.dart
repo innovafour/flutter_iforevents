@@ -6,7 +6,6 @@ import 'package:dart_ipify/dart_ipify.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:iforevents/integration/_integration.dart';
 import 'package:iforevents/models/device.dart';
-import 'package:flutter/widgets.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 export 'package:iforevents/integration/_integration.dart';
@@ -71,15 +70,9 @@ class Iforevents {
     }
   }
 
-  Future<void> screen({
-    required RouteSettings? toRoute,
-    required RouteSettings? previousRoute,
-  }) async {
+  Future<void> pageViewed({required PageViewEvent event}) async {
     try {
-      await IntegrationFactory.screen(
-        toRoute: toRoute,
-        previousRoute: previousRoute,
-      );
+      await IntegrationFactory.pageViewed(event: event);
     } catch (e) {
       return;
     }

@@ -13,11 +13,15 @@ class FirebaseIntegration extends Integration {
 
   @override
   Future<void> init() async {
+    super.init();
+
     await firebaseAnalytics.setAnalyticsCollectionEnabled(true);
   }
 
   @override
   Future<void> identify({required IdentifyEvent event}) async {
+    super.identify(event: event);
+
     await firebaseAnalytics.setUserId(
       id: event.customID,
       callOptions: AnalyticsCallOptions(global: true),
@@ -33,6 +37,8 @@ class FirebaseIntegration extends Integration {
 
   @override
   Future<void> track({required TrackEvent event}) async {
+    super.track(event: event);
+
     final eventProperties = <String, String>{};
 
     for (final key in event.properties.keys) {
@@ -49,6 +55,8 @@ class FirebaseIntegration extends Integration {
 
   @override
   Future<void> reset() async {
+    super.reset();
+
     await firebaseAnalytics.resetAnalyticsData();
   }
 }

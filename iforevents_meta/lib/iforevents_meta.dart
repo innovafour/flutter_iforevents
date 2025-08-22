@@ -13,6 +13,8 @@ class MetaIntegration extends Integration {
 
   @override
   Future<void> identify({required IdentifyEvent event}) async {
+    super.identify(event: event);
+
     await facebookAppEvents.setUserID(event.customID);
     await facebookAppEvents.setUserData(
       email: event.properties['email'],
@@ -24,6 +26,8 @@ class MetaIntegration extends Integration {
 
   @override
   Future<void> track({required TrackEvent event}) async {
+    super.track(event: event);
+
     final eventName = eventsMap[event.eventName] ?? event.eventName;
 
     final properties = <String, dynamic>{};
@@ -53,6 +57,8 @@ class MetaIntegration extends Integration {
 
   @override
   Future<void> reset() async {
+    super.reset();
+
     await facebookAppEvents.clearUserID();
   }
 

@@ -18,6 +18,8 @@ class MixpanelIntegration extends Integration {
 
   @override
   Future<void> init() async {
+    super.init();
+
     mixpanel = await Mixpanel.init(token, trackAutomaticEvents: false);
 
     people = mixpanel?.getPeople();
@@ -27,6 +29,8 @@ class MixpanelIntegration extends Integration {
 
   @override
   Future<void> identify({required IdentifyEvent event}) async {
+    super.identify(event: event);
+
     people?.deleteUser();
     await mixpanel?.clearSuperProperties();
 
@@ -59,6 +63,8 @@ class MixpanelIntegration extends Integration {
 
   @override
   Future<void> track({required TrackEvent event}) async {
+    super.track(event: event);
+
     await mixpanel?.track(
       event.eventName,
       properties: event.properties.map((key, value) {
@@ -73,6 +79,8 @@ class MixpanelIntegration extends Integration {
 
   @override
   Future<void> reset() async {
+    super.reset();
+
     await mixpanel?.flush();
     await mixpanel?.reset();
   }

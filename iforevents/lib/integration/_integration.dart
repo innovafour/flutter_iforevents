@@ -1,5 +1,4 @@
 import 'package:iforevents/models/integration.dart';
-import 'package:flutter/widgets.dart';
 
 export 'package:iforevents/models/integration.dart';
 
@@ -56,21 +55,12 @@ class IntegrationFactory {
     await Future.wait(awaitables);
   }
 
-  static Future<void> screen({
-    required RouteSettings? toRoute,
-    required RouteSettings? previousRoute,
-  }) async {
+  static Future<void> pageViewed({required PageViewEvent event}) async {
     final awaitables = <Future>[];
 
     for (final integration in integrations) {
       awaitables.add(
-        safeExecute(
-          () => integration.pageView(
-            toRoute: toRoute,
-            previousRoute: previousRoute,
-          ),
-          integration,
-        ),
+        safeExecute(() => integration.pageView(event: event), integration),
       );
     }
 

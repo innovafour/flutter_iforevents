@@ -18,6 +18,8 @@ class AlgoliaIntegration extends Integration<Insights> {
 
   @override
   Future<void> init() async {
+    super.init();
+
     if (applicationID.isEmpty) {
       throw Exception('Algolia application_id is required');
     }
@@ -31,11 +33,15 @@ class AlgoliaIntegration extends Integration<Insights> {
 
   @override
   Future<void> identify({required IdentifyEvent event}) async {
+    super.identify(event: event);
+
     insights?.userToken = event.customID;
   }
 
   @override
   Future<void> track({required TrackEvent event}) async {
+    super.track(event: event);
+
     const eventsDict = <String, String>{
       'view_product': 'Product Viewed',
       'checkout_coupon': 'Coupon Entered',

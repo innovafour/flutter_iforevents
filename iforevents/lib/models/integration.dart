@@ -1,28 +1,59 @@
-import 'package:iforevents/models/event.dart';
 import 'package:flutter/widgets.dart';
+import 'package:iforevents/models/event.dart';
 import 'package:iforevents/models/identify.dart';
+import 'package:iforevents/models/pageview.dart';
 
 export 'package:iforevents/models/event.dart';
 export 'package:iforevents/models/identify.dart';
+export 'package:iforevents/models/pageview.dart';
 
 class Integration<T> {
-  const Integration({this.onInit, this.onIdentify, this.onTrack, this.onReset});
+  const Integration({
+    this.onInit,
+    this.onIdentify,
+    this.onTrack,
+    this.onReset,
+    this.onPageView,
+  });
 
   final void Function()? onInit;
   final void Function()? onReset;
   final void Function(IdentifyEvent event)? onIdentify;
-  final void Function(IdentifyEvent event)? onTrack;
+  final void Function(TrackEvent event)? onTrack;
+  final void Function(PageViewEvent event)? onPageView;
 
-  Future<void> init() async {}
+  @mustCallSuper
+  Future<void> init() async {
+    if (onInit != null) {
+      onInit!();
+    }
+  }
 
-  Future<void> identify({required IdentifyEvent event}) async {}
+  @mustCallSuper
+  Future<void> identify({required IdentifyEvent event}) async {
+    if (onIdentify != null) {
+      onIdentify!(event);
+    }
+  }
 
-  Future<void> track({required TrackEvent event}) async {}
+  @mustCallSuper
+  Future<void> track({required TrackEvent event}) async {
+    if (onTrack != null) {
+      onTrack!(event);
+    }
+  }
 
-  Future<void> reset() async {}
+  @mustCallSuper
+  Future<void> reset() async {
+    if (onReset != null) {
+      onReset!();
+    }
+  }
 
-  Future<void> pageView({
-    required RouteSettings? toRoute,
-    required RouteSettings? previousRoute,
-  }) async {}
+  @mustCallSuper
+  Future<void> pageView({required PageViewEvent event}) async {
+    if (onPageView != null) {
+      onPageView!(event);
+    }
+  }
 }

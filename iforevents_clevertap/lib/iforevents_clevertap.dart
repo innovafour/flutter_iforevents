@@ -12,13 +12,9 @@ class ClevertapIntegration extends Integration {
   static bool isTheFirstTime = true;
 
   @override
-  Future<void> init({
-    String key = '',
-    Map<String, dynamic> config = const {},
-  }) async {}
-
-  @override
   Future<void> identify({required IdentifyEvent event}) async {
+    super.identify(event: event);
+
     final clevertapMap = <String, dynamic>{};
 
     for (var key in event.properties.keys) {
@@ -40,6 +36,8 @@ class ClevertapIntegration extends Integration {
 
   @override
   Future<void> track({required TrackEvent event}) async {
+    super.track(event: event);
+
     switch (event.eventName) {
       case 'Order Completed':
         final properties = event.properties;
@@ -61,6 +59,8 @@ class ClevertapIntegration extends Integration {
 
   @override
   Future<void> reset() async {
+    super.reset();
+
     await CleverTapPlugin.clearInAppResources(false);
   }
 

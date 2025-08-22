@@ -33,7 +33,13 @@ class IforeventsRouteObserver extends RouteObserver<PageRoute<dynamic>> {
     RouteSettings? to,
   }) {
     try {
-      iforevents.screen(toRoute: to, previousRoute: from);
+      iforevents.pageViewed(
+        event: PageViewEvent(
+          navigationType: type,
+          toRoute: to,
+          previousRoute: from,
+        ),
+      );
     } catch (_) {}
   }
 }
