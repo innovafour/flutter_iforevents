@@ -3,6 +3,8 @@ description: "A new Flutter package project."
 version: 0.0.1
 homepage: https://github.com/innovafour/flutter_iforevents
 
+resolution: workspace
+
 environment:
   sdk: ^3.8.1
   flutter: ">=1.17.0"

@@ -1,13 +1,10 @@
-import 'package:iforevents/models/event_type.dart';
+import 'package:iforevents/models/event.dart';
 import 'package:flutter/widgets.dart';
 
 class Integration {
   const Integration();
 
-  Future<void> init({
-    String key = '',
-    Map<String, dynamic> config = const {},
-  }) async {}
+  Future<void> init() async {}
 
   Future<void> identify({
     required String id,
@@ -22,7 +19,7 @@ class Integration {
 
   Future<void> reset() async {}
 
-  Future<void> screen({
+  Future<void> pageView({
     required RouteSettings? toRoute,
     required RouteSettings? previousRoute,
   }) async {}

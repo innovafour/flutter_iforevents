@@ -1,9 +1,7 @@
-name: iforevents_firebase
-description: "An Iforevents extension for Firebase integration."
+name: iforevents_algolia
+description: "A new Flutter package project."
 version: 0.0.1
-homepage: https://github.com/innovafour/iforevents
-
-resolution: workspace
+homepage: https://github.com/innovafour/flutter_iforevents
 
 environment:
   sdk: ^3.8.1
@@ -12,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  firebase_analytics: ^12.0.0
+  algolia_insights: ^1.0.3
   iforevents:
     git:
       url: https://github.com/innovafour/flutter_iforevents

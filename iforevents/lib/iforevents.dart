@@ -6,7 +6,7 @@ import 'package:dart_ipify/dart_ipify.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:iforevents/integration/_integration.dart';
 import 'package:iforevents/models/device.dart';
-import 'package:iforevents/models/event_type.dart';
+import 'package:iforevents/models/event.dart';
 import 'package:flutter/widgets.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 

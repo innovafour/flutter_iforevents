@@ -1,18 +1,17 @@
-import 'package:iforevents/models/event_type.dart';
+import 'package:iforevents/models/event.dart';
 import 'package:iforevents/models/integration.dart';
 import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 
 class MixpanelIntegration extends Integration {
-  const MixpanelIntegration();
+  const MixpanelIntegration({required this.key});
+
+  final String key;
 
   static Mixpanel? mixpanel;
   static People? people;
 
   @override
-  Future<void> init({
-    String key = '',
-    Map<String, dynamic> config = const {},
-  }) async {
+  Future<void> init() async {
     mixpanel = await Mixpanel.init(key, trackAutomaticEvents: false);
 
     people = mixpanel?.getPeople();

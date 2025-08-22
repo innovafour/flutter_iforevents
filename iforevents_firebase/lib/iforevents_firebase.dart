@@ -1,4 +1,4 @@
-import 'package:iforevents/models/event_type.dart';
+import 'package:iforevents/models/event.dart';
 import 'package:iforevents/models/integration.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 

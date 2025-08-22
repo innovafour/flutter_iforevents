@@ -1,4 +1,4 @@
-import 'package:iforevents/models/event_type.dart';
+import 'package:iforevents/models/event.dart';
 import 'package:iforevents/models/integration.dart';
 import 'package:flutter/widgets.dart';
 
@@ -75,7 +75,7 @@ class IntegrationFactory {
     for (final integration in integrations) {
       awaitables.add(
         safeExecute(
-          () => integration.screen(
+          () => integration.pageView(
             toRoute: toRoute,
             previousRoute: previousRoute,
           ),
