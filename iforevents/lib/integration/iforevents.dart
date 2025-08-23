@@ -330,7 +330,7 @@ class IForeventsAPIIntegration extends Integration {
         _eventQueue.clear();
       }
 
-      // Limpiar sessionUUID tanto en memoria como en storage
+      // Clear sessionUUID both in memory and storage
       _sessionUUID = null;
       _userUUID = null;
       _isIdentified = false;

@@ -80,12 +80,12 @@ class _IForeventsExampleState extends State<IForeventsExample> {
       requeueFailedEvents: true, // Retry failed events
     );
 
-    // Usar configuración debug para este ejemplo
+    // Use debug configuration for this example
     apiIntegration = IForeventsAPIIntegration(config: debugConfig);
 
     iforevents = const Iforevents();
 
-    // Inicializar IForevents con la integración API
+    // Initialize IForevents with API integration
     await iforevents.init(integrations: [apiIntegration]);
 
     setState(() {
@@ -93,7 +93,6 @@ class _IForeventsExampleState extends State<IForeventsExample> {
     });
   }
 
-  /// Ejemplo de identificación de usuario
   /// Example of user identification
   Future<void> _identifyUser() async {
     try {
@@ -101,8 +100,8 @@ class _IForeventsExampleState extends State<IForeventsExample> {
         event: IdentifyEvent(
           customID: 'user_123',
           properties: {
-            'email': 'user@example.com',
-            'name': 'Juan Pérez',
+            'email': 'john.smith@example.com',
+            'name': 'John Smith',
             'phone_number': '+34612345678',
             'age': 30,
             'plan': 'premium',
@@ -114,13 +113,12 @@ class _IForeventsExampleState extends State<IForeventsExample> {
       );
 
       _updateQueueStatus();
-      _showSnackBar('Usuario identificado correctamente');
+      _showSnackBar('User identified successfully');
     } catch (e) {
-      _showSnackBar('Error al identificar usuario: $e');
+      _showSnackBar('Error identifying user: $e');
     }
   }
 
-  /// Ejemplo de tracking de eventos individuales
   /// Example of tracking individual events
   Future<void> _trackSingleEvent() async {
     try {
@@ -137,18 +135,17 @@ class _IForeventsExampleState extends State<IForeventsExample> {
       );
 
       _updateQueueStatus();
-      _showSnackBar('Evento enviado');
+      _showSnackBar('Event sent');
     } catch (e) {
-      _showSnackBar('Error al enviar evento: $e');
+      _showSnackBar('Error sending event: $e');
     }
   }
 
-  /// Ejemplo de múltiples eventos para testing de batching
   /// Example of multiple events for batch testing
   // Small pause to simulate real-time events
   Future<void> _trackMultipleEvents() async {
     try {
-      // Simular múltiples eventos para probar el batching
+      // Simulate multiple events to test batching
       final events = [
         'page_view_home',
         'button_click_signup',
@@ -175,18 +172,18 @@ class _IForeventsExampleState extends State<IForeventsExample> {
           ),
         );
 
-        // Pequeña pausa para simular eventos en tiempo real
+        // Small pause to simulate real-time events
         await Future.delayed(Duration(milliseconds: 100));
       }
 
       _updateQueueStatus();
-      _showSnackBar('${events.length} eventos enviados');
+      _showSnackBar('${events.length} events sent');
     } catch (e) {
-      _showSnackBar('Error al enviar eventos: $e');
+      _showSnackBar('Error sending events: $e');
     }
   }
 
-  /// Ejemplo de page view tracking
+  /// Example of page view tracking
   /// Example of page view tracking
   Future<void> _trackPageView() async {
     try {
@@ -201,31 +198,31 @@ class _IForeventsExampleState extends State<IForeventsExample> {
       _updateQueueStatus();
       _showSnackBar('Page view tracked');
     } catch (e) {
-      _showSnackBar('Error al trackear page view: $e');
+      _showSnackBar('Error tracking page view: $e');
     }
   }
 
-  /// Ejemplo de flush manual de la cola
+  /// Example of manual queue flush
   /// Example of manual queue flush
   Future<void> _flushQueue() async {
     try {
       await apiIntegration.flush();
       _updateQueueStatus();
-      _showSnackBar('Cola vaciada manualmente');
+      _showSnackBar('Queue flushed manually');
     } catch (e) {
-      _showSnackBar('Error al vaciar cola: $e');
+      _showSnackBar('Error flushing queue: $e');
     }
   }
 
-  /// Ejemplo de reset de la integración
+  /// Example of integration reset
   /// Example of integration reset
   Future<void> _resetIntegration() async {
     try {
       await iforevents.reset();
       _updateQueueStatus();
-      _showSnackBar('Integración reseteada');
+      _showSnackBar('Integration reset');
     } catch (e) {
-      _showSnackBar('Error al resetear: $e');
+      _showSnackBar('Error resetting: $e');
     }
   }
 
@@ -268,34 +265,34 @@ class _IForeventsExampleState extends State<IForeventsExample> {
                           ),
                           SizedBox(height: 8),
                           if (queueStatus != null) ...[
-                            _buildStatusRow(
-                              'Initialized',
-                              queueStatus!.isInitialized,
+                            _StatusRow(
+                              label: 'Initialized',
+                              value: queueStatus!.isInitialized,
                             ),
-                            _buildStatusRow(
-                              'User Identified',
-                              queueStatus!.isIdentified,
+                            _StatusRow(
+                              label: 'User Identified',
+                              value: queueStatus!.isIdentified,
                             ),
-                            _buildStatusRow(
-                              'Queued Events',
-                              queueStatus!.queuedEvents,
+                            _StatusRow(
+                              label: 'Queued Events',
+                              value: queueStatus!.queuedEvents,
                             ),
-                            _buildStatusRow(
-                              'Batch Size',
-                              queueStatus!.batchSize,
+                            _StatusRow(
+                              label: 'Batch Size',
+                              value: queueStatus!.batchSize,
                             ),
                             if (queueStatus!.sessionUUID != null)
-                              _buildStatusRow(
-                                'Session UUID',
-                                queueStatus!.sessionUUID!,
+                              _StatusRow(
+                                label: 'Session UUID',
+                                value: queueStatus!.sessionUUID!,
                               ),
                             if (queueStatus!.userUUID != null)
-                              _buildStatusRow(
-                                'User UUID',
-                                queueStatus!.userUUID!,
+                              _StatusRow(
+                                label: 'User UUID',
+                                value: queueStatus!.userUUID!,
                               ),
                           ] else
-                            Text('Actualizando estado...'),
+                            Text('Updating state...'),
                         ],
                       ),
                     ),
@@ -315,7 +312,10 @@ class _IForeventsExampleState extends State<IForeventsExample> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                     ),
-                    child: Text('1. Identify User'),
+                    child: Text(
+                      '1. Identify User',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
 
                   SizedBox(height: 8),
@@ -325,7 +325,10 @@ class _IForeventsExampleState extends State<IForeventsExample> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                     ),
-                    child: Text('2. Send Single Event'),
+                    child: Text(
+                      '2. Send Single Event',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
 
                   SizedBox(height: 8),
@@ -335,7 +338,10 @@ class _IForeventsExampleState extends State<IForeventsExample> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                     ),
-                    child: Text('3. Send Multiple Events (Batch Test)'),
+                    child: Text(
+                      '3. Send Multiple Events (Batch Test)',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
 
                   SizedBox(height: 8),
@@ -345,7 +351,10 @@ class _IForeventsExampleState extends State<IForeventsExample> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.purple,
                     ),
-                    child: Text('4. Track Page View'),
+                    child: Text(
+                      '4. Track Page View',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
 
                   SizedBox(height: 16),
@@ -361,7 +370,10 @@ class _IForeventsExampleState extends State<IForeventsExample> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.amber,
                     ),
-                    child: Text('Flush Queue Manually'),
+                    child: Text(
+                      'Flush Queue Manually',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
 
                   SizedBox(height: 8),
@@ -371,7 +383,10 @@ class _IForeventsExampleState extends State<IForeventsExample> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                     ),
-                    child: Text('Reset Integration'),
+                    child: Text(
+                      'Reset Integration',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
 
                   SizedBox(height: 8),
@@ -381,7 +396,10 @@ class _IForeventsExampleState extends State<IForeventsExample> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.grey,
                     ),
-                    child: Text('Update Status'),
+                    child: Text(
+                      'Update Status',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
 
                   SizedBox(height: 32),
@@ -416,7 +434,22 @@ class _IForeventsExampleState extends State<IForeventsExample> {
     );
   }
 
-  Widget _buildStatusRow(String label, dynamic value) {
+  @override
+  void dispose() {
+    // Clean up resources if necessary
+    apiIntegration.dispose();
+    super.dispose();
+  }
+}
+
+class _StatusRow extends StatelessWidget {
+  const _StatusRow({required this.label, required this.value});
+
+  final String label;
+  final dynamic value;
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -439,16 +472,9 @@ class _IForeventsExampleState extends State<IForeventsExample> {
       ),
     );
   }
-
-  @override
-  void dispose() {
-    // Limpiar recursos si es necesario
-    apiIntegration.dispose();
-    super.dispose();
-  }
 }
 
-/// Ejemplos de configuraciones específicas para diferentes casos de uso
+/// Examples of specific configurations for different use cases
 /// Examples of specific configurations for different use cases
 
 class IForeventsConfigExamples {
@@ -474,7 +500,7 @@ class IForeventsConfigExamples {
     );
   }
 
-  /// Configuración para desarrollo y testing
+  /// Configuration for development and testing
   /// Configuration for development and testing
   static IForeventsAPIConfig development({
     required String projectKey,
@@ -495,7 +521,7 @@ class IForeventsConfigExamples {
     );
   }
 
-  /// Configuración para aplicaciones offline-first
+  /// Configuration for offline-first applications
   /// Configuration for offline-first applications
   static IForeventsAPIConfig offlineFirst({
     required String projectKey,
@@ -517,7 +543,7 @@ class IForeventsConfigExamples {
     );
   }
 
-  /// Configuración para envío en tiempo real (sin batching)
+  /// Configuration for real-time sending (no batching)
   /// Configuration for real-time sending (no batching)
   static IForeventsAPIConfig realTime({
     required String projectKey,

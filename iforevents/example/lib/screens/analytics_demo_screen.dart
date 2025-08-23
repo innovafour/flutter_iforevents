@@ -61,282 +61,140 @@ class _AnalyticsDemoScreenState extends State<AnalyticsDemoScreen> {
             ),
           ),
           SizedBox(height: 16),
-          _buildEventTypeSection('Basic Events', [
-            _buildEventButton(
-              'Simple Track Event',
-              'Track a basic event without properties',
-              Colors.blue,
-              Icons.track_changes,
-              () => _trackSimpleEvent(),
-            ),
-            _buildEventButton(
-              'Event with Properties',
-              'Track an event with custom properties',
-              Colors.green,
-              Icons.list,
-              () => _trackEventWithProperties(),
-            ),
-            _buildEventButton(
-              'Screen Event',
-              'Track a screen view event',
-              Colors.orange,
-              Icons.screen_lock_portrait,
-              () => _trackScreenEvent(),
-            ),
-          ]),
+          _EventTypeSection(
+            context: context,
+            title: 'Basic Events',
+            buttons: [
+              _EventButton(
+                title: 'Simple Track Event',
+                description: 'Track a basic event without properties',
+                color: Colors.blue,
+                icon: Icons.track_changes,
+                onPressed: () => _trackSimpleEvent(),
+              ),
+              _EventButton(
+                title: 'Event with Properties',
+                description: 'Track an event with custom properties',
+                color: Colors.green,
+                icon: Icons.list,
+                onPressed: () => _trackEventWithProperties(),
+              ),
+              _EventButton(
+                title: 'Screen Event',
+                description: 'Track a screen view event',
+                color: Colors.orange,
+                icon: Icons.screen_lock_portrait,
+                onPressed: () => _trackScreenEvent(),
+              ),
+            ],
+          ),
           SizedBox(height: 16),
-          _buildEventTypeSection('E-commerce Events', [
-            _buildEventButton(
-              'Product Viewed',
-              'Track when a user views a product',
-              Colors.cyan,
-              Icons.shopping_bag,
-              () => _trackProductViewed(),
-            ),
-            _buildEventButton(
-              'Add to Cart',
-              'Track when a product is added to cart',
-              Colors.indigo,
-              Icons.add_shopping_cart,
-              () => _trackAddToCart(),
-            ),
-            _buildEventButton(
-              'Purchase Completed',
-              'Track a completed purchase',
-              Colors.teal,
-              Icons.payment,
-              () => _trackPurchase(),
-            ),
-          ]),
+          _EventTypeSection(
+            context: context,
+            title: 'E-commerce Events',
+            buttons: [
+              _EventButton(
+                title: 'Product Viewed',
+                description: 'Track when a user views a product',
+                color: Colors.cyan,
+                icon: Icons.shopping_bag,
+                onPressed: () => _trackProductViewed(),
+              ),
+              _EventButton(
+                title: 'Add to Cart',
+                description: 'Track when a product is added to cart',
+                color: Colors.indigo,
+                icon: Icons.add_shopping_cart,
+                onPressed: () => _trackAddToCart(),
+              ),
+              _EventButton(
+                title: 'Purchase Completed',
+                description: 'Track a completed purchase',
+                color: Colors.teal,
+                icon: Icons.payment,
+                onPressed: () => _trackPurchase(),
+              ),
+            ],
+          ),
           SizedBox(height: 16),
-          _buildEventTypeSection('User Engagement', [
-            _buildEventButton(
-              'Feature Used',
-              'Track feature usage with details',
-              Colors.deepPurple,
-              Icons.star,
-              () => _trackFeatureUsage(),
-            ),
-            _buildEventButton(
-              'Content Shared',
-              'Track content sharing behavior',
-              Colors.pink,
-              Icons.share,
-              () => _trackContentShared(),
-            ),
-            _buildEventButton(
-              'Tutorial Completed',
-              'Track tutorial or onboarding completion',
-              Colors.amber,
-              Icons.school,
-              () => _trackTutorialCompleted(),
-            ),
-          ]),
+          _EventTypeSection(
+            context: context,
+            title: 'User Engagement',
+            buttons: [
+              _EventButton(
+                title: 'Feature Used',
+                description: 'Track feature usage with details',
+                color: Colors.deepPurple,
+                icon: Icons.star,
+                onPressed: () => _trackFeatureUsage(),
+              ),
+              _EventButton(
+                title: 'Content Shared',
+                description: 'Track content sharing behavior',
+                color: Colors.pink,
+                icon: Icons.share,
+                onPressed: () => _trackContentShared(),
+              ),
+              _EventButton(
+                title: 'Tutorial Completed',
+                description: 'Track tutorial or onboarding completion',
+                color: Colors.amber,
+                icon: Icons.school,
+                onPressed: () => _trackTutorialCompleted(),
+              ),
+            ],
+          ),
           SizedBox(height: 16),
-          _buildStatsCard(),
+          _StatsCard(
+            buttonClickCount: _buttonClickCount,
+            customEventCount: _customEventCount,
+          ),
           SizedBox(height: 16),
-          _buildRecentEventsCard(),
+          _RecentEventsCard(recentEvents: _recentEvents),
           SizedBox(height: 16),
-          _buildActionButtons(),
+          Column(
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _clearStats,
+                  icon: Icon(Icons.clear_all, color: Colors.white),
+                  label: Text(
+                    'Clear Stats',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _generateRandomEvents,
+                  icon: Icon(Icons.shuffle, color: Colors.purple),
+                  label: Text(
+                    'Generate Random Events',
+                    style: TextStyle(color: Colors.purple),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.purple),
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
-    );
-  }
-
-  Widget _buildEventTypeSection(String title, List<Widget> buttons) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: Colors.purple.shade700,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: 8),
-        ...buttons,
-      ],
-    );
-  }
-
-  Widget _buildEventButton(
-    String title,
-    String description,
-    Color color,
-    IconData icon,
-    VoidCallback onPressed,
-  ) {
-    return Card(
-      margin: EdgeInsets.symmetric(vertical: 4),
-      child: ListTile(
-        leading: Icon(icon, color: color, size: 32),
-        title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(description),
-        trailing: ElevatedButton(
-          onPressed: onPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: color,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-          ),
-          child: Text('Track', style: TextStyle(color: Colors.white)),
-        ),
-        onTap: onPressed,
-      ),
-    );
-  }
-
-  Widget _buildStatsCard() {
-    return Card(
-      color: Colors.purple.shade50,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Session Stats',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.purple.shade800,
-              ),
-            ),
-            SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildStatItem(
-                  'Button Clicks',
-                  _buttonClickCount.toString(),
-                  Icons.touch_app,
-                ),
-                _buildStatItem(
-                  'Custom Events',
-                  _customEventCount.toString(),
-                  Icons.event,
-                ),
-                _buildStatItem(
-                  'Total Events',
-                  (_buttonClickCount + _customEventCount).toString(),
-                  Icons.analytics,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatItem(String label, String value, IconData icon) {
-    return Column(
-      children: [
-        Icon(icon, color: Colors.purple.shade600, size: 32),
-        SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.purple.shade800,
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(fontSize: 12, color: Colors.purple.shade600),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRecentEventsCard() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Recent Events',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.purple.shade800,
-              ),
-            ),
-            SizedBox(height: 12),
-            if (_recentEvents.isEmpty)
-              Text(
-                'No events tracked yet. Try tracking some events above!',
-                style: TextStyle(color: Colors.grey.shade600),
-              )
-            else
-              Column(
-                children: _recentEvents.take(5).map((event) {
-                  return ListTile(
-                    dense: true,
-                    leading: Icon(Icons.circle, color: Colors.purple, size: 8),
-                    title: Text(
-                      event['name'] ?? 'Unknown Event',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(
-                      '${event['properties']?.length ?? 0} properties',
-                    ),
-                    trailing: Text(
-                      event['timestamp'] ?? '',
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                  );
-                }).toList(),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionButtons() {
-    return Column(
-      children: [
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed: _clearStats,
-            icon: Icon(Icons.clear_all, color: Colors.white),
-            label: Text('Clear Stats', style: TextStyle(color: Colors.white)),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              padding: EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-        ),
-        SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: _generateRandomEvents,
-            icon: Icon(Icons.shuffle, color: Colors.purple),
-            label: Text(
-              'Generate Random Events',
-              style: TextStyle(color: Colors.purple),
-            ),
-            style: OutlinedButton.styleFrom(
-              side: BorderSide(color: Colors.purple),
-              padding: EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -561,5 +419,216 @@ class _AnalyticsDemoScreenState extends State<AnalyticsDemoScreen> {
     setState(() {
       _customEventCount += 3;
     });
+  }
+}
+
+class _StatsCard extends StatelessWidget {
+  const _StatsCard({
+    required this.buttonClickCount,
+    required this.customEventCount,
+  });
+
+  final int buttonClickCount;
+  final int customEventCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.purple.shade50,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Session Stats',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.purple.shade800,
+              ),
+            ),
+            SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _StatItem(
+                  label: 'Button Clicks',
+                  value: buttonClickCount.toString(),
+                  icon: Icons.touch_app,
+                ),
+                _StatItem(
+                  label: 'Custom Events',
+                  value: customEventCount.toString(),
+                  icon: Icons.event,
+                ),
+                _StatItem(
+                  label: 'Total Events',
+                  value: (buttonClickCount + customEventCount).toString(),
+                  icon: Icons.analytics,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RecentEventsCard extends StatelessWidget {
+  const _RecentEventsCard({required this.recentEvents});
+
+  final List<Map<String, dynamic>> recentEvents;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Recent Events',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.purple.shade800,
+              ),
+            ),
+            SizedBox(height: 12),
+            if (recentEvents.isEmpty)
+              Text(
+                'No events tracked yet. Try tracking some events above!',
+                style: TextStyle(color: Colors.grey.shade600),
+              )
+            else
+              Column(
+                children: recentEvents.take(5).map((event) {
+                  return ListTile(
+                    dense: true,
+                    leading: Icon(Icons.circle, color: Colors.purple, size: 8),
+                    title: Text(
+                      event['name'] ?? 'Unknown Event',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      '${event['properties']?.length ?? 0} properties',
+                    ),
+                    trailing: Text(
+                      event['timestamp'] ?? '',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  );
+                }).toList(),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatItem extends StatelessWidget {
+  const _StatItem({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(icon, color: Colors.purple.shade600, size: 32),
+        SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.purple.shade800,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(fontSize: 12, color: Colors.purple.shade600),
+        ),
+      ],
+    );
+  }
+}
+
+class _EventButton extends StatelessWidget {
+  const _EventButton({
+    required this.title,
+    required this.description,
+    required this.color,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  final String title;
+  final String description;
+  final Color color;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 4),
+      child: ListTile(
+        leading: Icon(icon, color: color, size: 32),
+        title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(description),
+        trailing: ElevatedButton(
+          onPressed: onPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: color,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+          child: Text('Track', style: TextStyle(color: Colors.white)),
+        ),
+        onTap: onPressed,
+      ),
+    );
+  }
+}
+
+class _EventTypeSection extends StatelessWidget {
+  const _EventTypeSection({
+    required this.context,
+    required this.title,
+    required this.buttons,
+  });
+
+  final BuildContext context;
+  final String title;
+  final List<Widget> buttons;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: Colors.purple.shade700,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: 8),
+        ...buttons,
+      ],
+    );
   }
 }

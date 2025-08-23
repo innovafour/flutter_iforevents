@@ -38,10 +38,10 @@ class _IForeventsAPIExamplePageState extends State<IForeventsAPIExamplePage> {
         requireIdentifyBeforeTrack: true, // Require identify before track
       );
 
-      // Crear la integración
+      // Create the integration
       apiIntegration = IForeventsAPIIntegration(config: config);
 
-      // Inicializar IForevents con la integración API
+      // Initialize IForevents with API integration
       iforevents = const Iforevents();
       await iforevents.init(integrations: [apiIntegration!]);
 

@@ -123,7 +123,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             value: _selectedLanguage,
             items: [
               {'value': 'english', 'label': 'English'},
-              {'value': 'spanish', 'label': 'Español'},
+              {'value': 'spanish', 'label': 'Spanish'},
               {'value': 'french', 'label': 'Français'},
               {'value': 'german', 'label': 'Deutsch'},
             ],

@@ -3,7 +3,7 @@ import 'package:iforevents/models/integration.dart';
 
 export 'package:iforevents/models/integration.dart';
 
-/// Resultado de la ejecución de una integración
+/// Result of integration execution
 class IntegrationResult {
   final String integrationName;
   final bool success;
@@ -114,7 +114,7 @@ class IntegrationFactory {
         timestamp: DateTime.now(),
       );
     } catch (e) {
-      log('Error en integración ${integration.runtimeType}: $e');
+      log('Error in integration ${integration.runtimeType}: $e');
       return IntegrationResult(
         integrationName: integration.runtimeType.toString(),
         success: false,
@@ -124,7 +124,7 @@ class IntegrationFactory {
     }
   }
 
-  /// Ejecuta una integración específica por nombre
+  /// Executes a specific integration by name
   static Future<IntegrationResult?> executeSpecificIntegration(
     String integrationName,
     Function(Integration) action,
@@ -136,7 +136,7 @@ class IntegrationFactory {
 
       return await safeExecute(() => action(integration), integration);
     } catch (e) {
-      log('Integración no encontrada: $integrationName');
+      log('Integration not found: $integrationName');
       return null;
     }
   }

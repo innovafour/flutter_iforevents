@@ -50,7 +50,7 @@ class PendingEvent extends Equatable {
     );
   }
 
-  /// Verifica si es tiempo de reintentar el evento
+  /// Checks if it's time to retry the event
   bool get shouldRetry {
     if (attemptCount >= RetryConfig.maxRetryAttempts) return false;
 
@@ -61,13 +61,13 @@ class PendingEvent extends Equatable {
     return DateTime.now().isAfter(nextRetryTime);
   }
 
-  /// Calcula el intervalo de reintento basado en el número de intentos
+  /// Calculates the retry interval based on the number of attempts
   int _getRetryInterval() {
     final interval = RetryConfig.getRetryIntervalForAttempt(attemptCount + 1);
     return interval ?? RetryConfig.retryIntervals.last;
   }
 
-  /// Convierte el evento pendiente de vuelta al evento original
+  /// Converts the pending event back to the original event
   dynamic toOriginalEvent() {
     switch (eventType) {
       case PendingEventType.track:
@@ -97,7 +97,7 @@ class PendingEvent extends Equatable {
     }
   }
 
-  /// Crea un PendingEvent desde un TrackEvent
+  /// Creates a PendingEvent from a TrackEvent
   static PendingEvent fromTrackEvent(
     TrackEvent event,
     String integrationName, {
@@ -118,7 +118,7 @@ class PendingEvent extends Equatable {
     );
   }
 
-  /// Crea un PendingEvent desde un IdentifyEvent
+  /// Creates a PendingEvent from an IdentifyEvent
   static PendingEvent fromIdentifyEvent(
     IdentifyEvent event,
     String integrationName, {
@@ -135,7 +135,7 @@ class PendingEvent extends Equatable {
     );
   }
 
-  /// Crea un PendingEvent desde un PageViewEvent
+  /// Creates a PendingEvent from a PageViewEvent
   static PendingEvent fromPageViewEvent(
     PageViewEvent event,
     String integrationName, {
@@ -168,7 +168,7 @@ class PendingEvent extends Equatable {
     createdAt,
   ];
 
-  /// Convierte el PendingEvent a JSON para almacenamiento
+  /// Converts the PendingEvent to JSON for storage
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -182,7 +182,7 @@ class PendingEvent extends Equatable {
     };
   }
 
-  /// Crea un PendingEvent desde JSON
+  /// Creates a PendingEvent from JSON
   static PendingEvent fromJson(Map<String, dynamic> json) {
     return PendingEvent(
       id: json['id'] as String,
