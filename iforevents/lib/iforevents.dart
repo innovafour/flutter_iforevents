@@ -188,16 +188,12 @@ class Iforevents {
         return req.close();
       });
 
-      if (response.statusCode == 200) {
-        final json = await response.transform(utf8.decoder).join();
+      final json = await response.transform(utf8.decoder).join();
 
-        return jsonDecode(json)['ip'];
-      }
+      return jsonDecode(json)['ip'];
     } catch (e) {
       return null;
     }
-
-    return null;
   }
 
   static Future<Device> get deviceData async {

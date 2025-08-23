@@ -2,23 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:iforevents/iforevents.dart';
 import 'package:iforevents/models/iforevents_api_config.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'IForevents API Integration Example',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: IForeventsAPIExamplePage(),
-    );
-  }
-}
-
 class IForeventsAPIExamplePage extends StatefulWidget {
   const IForeventsAPIExamplePage({super.key});
 
@@ -42,16 +25,17 @@ class _IForeventsAPIExamplePageState extends State<IForeventsAPIExamplePage> {
 
   Future<void> _initializeIForevents() async {
     try {
-      // Configuración de la integración API de IForevents
+      // IForevents API integration configuration
       final config = IForeventsAPIConfig(
-        projectKey: 'demo-project-key', // Reemplaza con tu project key
-        projectSecret: 'demo-project-secret', // Reemplaza con tu project secret
-        baseUrl: 'https://your-api-domain.com', // Reemplaza con tu base URL
-        batchSize: 5, // Enviar eventos en lotes de 5
-        batchIntervalMs: 3000, // Revisar cada 3 segundos
-        enableLogging: true, // Habilitar logs para desarrollo
-        throwOnError: false, // No lanzar excepciones
-        requireIdentifyBeforeTrack: true, // Requiere identificar antes de track
+        projectKey: 'demo-project-key', // Replace with your project key
+        projectSecret:
+            'demo-project-secret', // Replace with your project secret
+        baseUrl: 'https://your-api-domain.com', // Replace with your base URL
+        batchSize: 5, // Send events in batches of 5
+        batchIntervalMs: 3000, // Check every 3 seconds
+        enableLogging: true, // Enable logs for development
+        throwOnError: false, // Do not throw exceptions
+        requireIdentifyBeforeTrack: true, // Require identify before track
       );
 
       // Crear la integración
@@ -181,7 +165,7 @@ class _IForeventsAPIExamplePageState extends State<IForeventsAPIExamplePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Estado
+            // Status
             Card(
               child: Padding(
                 padding: EdgeInsets.all(16.0),
@@ -225,7 +209,7 @@ class _IForeventsAPIExamplePageState extends State<IForeventsAPIExamplePage> {
 
             SizedBox(height: 16),
 
-            // Botones de acción
+            // Action buttons
             Text('Actions', style: Theme.of(context).textTheme.headlineSmall),
             SizedBox(height: 8),
 
@@ -277,7 +261,7 @@ class _IForeventsAPIExamplePageState extends State<IForeventsAPIExamplePage> {
 
             SizedBox(height: 24),
 
-            // Información
+            // Information
             Card(
               child: Padding(
                 padding: EdgeInsets.all(16.0),

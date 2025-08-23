@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:dio/dio.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:iforevents/iforevents.dart';
 import 'package:iforevents/models/iforevents_api_config.dart';
 
@@ -14,14 +15,42 @@ import 'package:iforevents/models/iforevents_api_config.dart';
 /// - Customizable configuration
 /// - Offline event queuing
 /// - Error handling and retry logic
+///
+/// This class implements a singleton pattern to ensure session state
+/// persistence across the application lifecycle.
+///
+/// Usage:
+/// ```dart
+/// final integration = IForeventsAPIIntegration(config: config);
+/// await integration.init();
+///
+/// // Or using the static getter
+/// final integration = IForeventsAPIIntegration.instance;
+/// ```
 class IForeventsAPIIntegration extends Integration {
-  IForeventsAPIIntegration({required this.config}) : _dio = Dio() {
+  // Singleton implementation
+  static IForeventsAPIIntegration? _instance;
+
+  // Private constructor
+  IForeventsAPIIntegration._internal({required this.config}) : _dio = Dio() {
     _setupDio();
     _initializeQueue();
   }
 
+  // Factory constructor that returns the singleton instance
+  factory IForeventsAPIIntegration({required IForeventsAPIConfig config}) {
+    _instance ??= IForeventsAPIIntegration._internal(config: config);
+    return _instance!;
+  }
+
+  // Static getter for the instance
+  static IForeventsAPIIntegration? get instance => _instance;
+
   final IForeventsAPIConfig config;
   final Dio _dio;
+  final GetStorage _storage = GetStorage();
+
+  static const String _sessionUUIDKey = 'iforevents_session_uuid';
 
   String? _sessionUUID;
   String? _userUUID;
@@ -46,7 +75,7 @@ class IForeventsAPIIntegration extends Integration {
   int get queuedEventsCount => _eventQueue.length;
 
   void _setupDio() {
-    _dio.options.baseUrl = config.baseUrl;
+    _dio.options.baseUrl = '${config.baseUrl}/v1';
     _dio.options.connectTimeout = Duration(
       milliseconds: config.connectTimeoutMs,
     );
@@ -67,7 +96,7 @@ class IForeventsAPIIntegration extends Integration {
             'X-Project-Secret': config.projectSecret,
           });
 
-          if (_sessionUUID != null && !options.path.contains('/identify')) {
+          if (_sessionUUID != null) {
             options.headers['X-Session-UUID'] = _sessionUUID;
           }
 
@@ -129,6 +158,29 @@ class IForeventsAPIIntegration extends Integration {
   Future<void> init() async {
     try {
       await super.init();
+
+      // Cargar el sessionUUID guardado localmente si no está ya cargado
+      if (_sessionUUID == null) {
+        _sessionUUID = _storage.read(_sessionUUIDKey);
+        if (_sessionUUID != null) {
+          _isIdentified = true;
+
+          if (config.enableLogging) {
+            developer.log(
+              'Loaded saved sessionUUID: $_sessionUUID',
+              name: 'IForeventsAPI',
+            );
+          }
+        }
+      } else {
+        if (config.enableLogging) {
+          developer.log(
+            'SessionUUID already loaded in singleton: $_sessionUUID',
+            name: 'IForeventsAPI',
+          );
+        }
+      }
+
       _isInitialized = true;
 
       if (config.enableLogging) {
@@ -164,13 +216,27 @@ class IForeventsAPIIntegration extends Integration {
 
       final response = await _dio.post('/events/identify', data: requestData);
 
-      if (response.statusCode == 200 && response.data != null) {
+      if (response.data != null) {
         final responseData = response.data as Map<String, dynamic>;
         final session = responseData['session'] as Map<String, dynamic>?;
 
         if (session != null) {
-          _sessionUUID = session['uuid'] as String?;
+          final newSessionUUID = session['uuid'] as String?;
           _userUUID = session['user_uuid'] as String?;
+
+          // Actualizar sessionUUID y guardarlo localmente
+          if (newSessionUUID != null) {
+            _sessionUUID = newSessionUUID;
+            await _storage.write(_sessionUUIDKey, _sessionUUID);
+
+            if (config.enableLogging) {
+              developer.log(
+                'SessionUUID updated and saved: $_sessionUUID',
+                name: 'IForeventsAPI',
+              );
+            }
+          }
+
           _isIdentified = true;
 
           if (config.enableLogging) {
@@ -204,19 +270,6 @@ class IForeventsAPIIntegration extends Integration {
       throw IForeventsAPIException(
         'Integration not initialized. Call init() first.',
       );
-    }
-
-    if (!_isIdentified) {
-      if (config.requireIdentifyBeforeTrack) {
-        throw IForeventsAPIException(
-          'User must be identified before tracking events. Call identify() first.',
-        );
-      } else if (config.enableLogging) {
-        developer.log(
-          'Warning: Tracking event without user identification',
-          name: 'IForeventsAPI',
-        );
-      }
     }
 
     try {
@@ -277,9 +330,11 @@ class IForeventsAPIIntegration extends Integration {
         _eventQueue.clear();
       }
 
+      // Limpiar sessionUUID tanto en memoria como en storage
       _sessionUUID = null;
       _userUUID = null;
       _isIdentified = false;
+      await _storage.remove(_sessionUUIDKey);
 
       if (config.enableLogging) {
         developer.log(
@@ -312,6 +367,36 @@ class IForeventsAPIIntegration extends Integration {
       sessionUUID: _sessionUUID,
       userUUID: _userUUID,
     );
+  }
+
+  /// Get the sessionUUID stored in local storage (if any)
+  String? getStoredSessionUUID() {
+    return _storage.read(_sessionUUIDKey);
+  }
+
+  /// Clear the stored sessionUUID from local storage
+  Future<void> clearStoredSessionUUID() async {
+    await _storage.remove(_sessionUUIDKey);
+    if (config.enableLogging) {
+      developer.log(
+        'Stored sessionUUID cleared from local storage',
+        name: 'IForeventsAPI',
+      );
+    }
+  }
+
+  /// Reset the singleton instance completely
+  /// This will create a new instance on the next factory call
+  static void resetSingleton() {
+    _instance?.dispose();
+    _instance = null;
+  }
+
+  /// Get or create the singleton instance
+  static IForeventsAPIIntegration getInstance({
+    required IForeventsAPIConfig config,
+  }) {
+    return IForeventsAPIIntegration(config: config);
   }
 
   Map<String, dynamic> _buildIdentifyRequest(IdentifyEvent event) {
@@ -410,10 +495,9 @@ class IForeventsAPIIntegration extends Integration {
     if (events.isEmpty) return;
 
     try {
-      await _dio.post(
-        '/events/batch',
-        data: {'events': events.map((e) => e.toJson()).toList()},
-      );
+      final body = events.map((e) => e.toJson()).toList();
+
+      await _dio.post('/events/batch', data: {'events': body});
 
       if (config.enableLogging) {
         developer.log(

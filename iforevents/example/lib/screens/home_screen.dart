@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:iforevents/iforevents.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   final Iforevents iforevents;
 
   const HomeScreen({super.key, required this.iforevents});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,6 +72,24 @@ class HomeScreen extends StatelessWidget {
               Icons.analytics,
               Colors.purple,
             ),
+            SizedBox(height: 12),
+            _buildActionButton(
+              'IForevents API',
+              Icons.event,
+              Colors.blueGrey,
+              () {
+                Navigator.pushNamed(context, '/iforevents');
+              },
+            ),
+            SizedBox(height: 12),
+            _buildActionButton(
+              'IForevents API 2',
+              Icons.event,
+              Colors.blueAccent,
+              () {
+                Navigator.pushNamed(context, '/iforevents/2');
+              },
+            ),
             SizedBox(height: 24),
             Text(
               'Quick Actions',
@@ -101,7 +124,7 @@ class HomeScreen extends StatelessWidget {
   ) {
     return ElevatedButton.icon(
       onPressed: () {
-        iforevents.track(
+        widget.iforevents.track(
           event: TrackEvent(
             eventName: 'navigation_button_clicked',
             properties: {'target_screen': route, 'button_title': title},
@@ -138,7 +161,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   void _trackButtonClick() {
-    iforevents.track(
+    widget.iforevents.track(
       event: TrackEvent(
         eventName: 'button_clicked',
         properties: {
@@ -151,7 +174,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   void _trackCustomEvent() {
-    iforevents.track(
+    widget.iforevents.track(
       event: TrackEvent(
         eventName: 'custom_event_triggered',
         properties: {

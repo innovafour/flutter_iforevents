@@ -4,30 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:iforevents/iforevents.dart';
 import 'package:iforevents/models/iforevents_api_config.dart';
 
-/// Ejemplo completo de uso de la integración IForevents API
+/// Complete example of using the IForevents API integration
 ///
-/// Este ejemplo muestra cómo:
-/// 1. Configurar la integración con diferentes opciones
-/// 2. Inicializar IForevents con la integración API
-/// 3. Identificar usuarios
-/// 4. Enviar eventos individuales y por lotes
-/// 5. Manejar el estado de la cola
-/// 6. Configurar diferentes modos de operación
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'IForevents API Example',
-      home: IForeventsExample(),
-    );
-  }
-}
+/// This example shows how to:
+/// 1. Configure the integration with different options
+/// 2. Initialize IForevents with the API integration
+/// 3. Identify users
+/// 4. Send individual and batch events
+/// 5. Manage queue status
+/// 6. Configure different operation modes
 
 class IForeventsExample extends StatefulWidget {
   const IForeventsExample({super.key});
@@ -49,50 +34,50 @@ class _IForeventsExampleState extends State<IForeventsExample> {
     _setupIForevents();
   }
 
-  /// Configuración de IForevents con diferentes ejemplos de configuración
+  /// IForevents configuration with different example setups
   Future<void> _setupIForevents() async {
-    // Ejemplo 1: Configuración para desarrollo/debug
+    // Example 1: Development/debug configuration
     final debugConfig = IForeventsAPIConfig(
       projectKey: 'your-project-key',
       projectSecret: 'your-project-secret',
       baseUrl: 'https://your-api-domain.com',
-      batchSize: 5, // Lotes más pequeños para testing
-      batchIntervalMs: 3000, // Revisar cada 3 segundos
-      enableLogging: true, // Activar logs detallados
-      throwOnError: true, // Lanzar excepciones para debugging
+      batchSize: 5, // Smaller batches for testing
+      batchIntervalMs: 3000, // Check every 3 seconds
+      enableLogging: true, // Enable detailed logs
+      throwOnError: true, // Throw exceptions for debugging
       enableRetry: true,
       maxRetries: 2,
     );
 
-    // Ejemplo 2: Configuración básica (recomendada para producción)
+    // Example 2: Basic configuration (recommended for production)
     final basicConfig = IForeventsAPIConfig(
       projectKey: 'your-project-key',
       projectSecret: 'your-project-secret',
       baseUrl: 'https://your-api-domain.com',
-      batchSize: 10, // Enviar en lotes de 10 eventos
-      enableLogging: false, // Desactivar logs en producción
+      batchSize: 10, // Send in batches of 10 events
+      enableLogging: false, // Disable logs in production
     );
 
-    // Ejemplo 3: Configuración para envío inmediato (sin batching)
+    // Example 3: Immediate sending configuration (no batching)
     final immediateConfig = IForeventsAPIConfig(
       projectKey: 'your-project-key',
       projectSecret: 'your-project-secret',
       baseUrl: 'https://your-api-domain.com',
-      batchSize: 1, // Envío inmediato
+      batchSize: 1, // Immediate sending
       enableLogging: true,
-      requireIdentifyBeforeTrack: false, // Permitir tracking sin identificar
+      requireIdentifyBeforeTrack: false, // Allow tracking without identifying
     );
 
-    // Ejemplo 4: Configuración de alta frecuencia
+    // Example 4: High frequency configuration
     final highVolumeConfig = IForeventsAPIConfig(
       projectKey: 'your-project-key',
       projectSecret: 'your-project-secret',
       baseUrl: 'https://your-api-domain.com',
-      batchSize: 50, // Lotes grandes
-      batchIntervalMs: 10000, // Revisar cada 10 segundos
-      connectTimeoutMs: 15000, // Timeout más largo
+      batchSize: 50, // Large batches
+      batchIntervalMs: 10000, // Check every 10 seconds
+      connectTimeoutMs: 15000, // Longer timeout
       receiveTimeoutMs: 15000,
-      requeueFailedEvents: true, // Reintentizar eventos fallidos
+      requeueFailedEvents: true, // Retry failed events
     );
 
     // Usar configuración debug para este ejemplo
@@ -109,6 +94,7 @@ class _IForeventsExampleState extends State<IForeventsExample> {
   }
 
   /// Ejemplo de identificación de usuario
+  /// Example of user identification
   Future<void> _identifyUser() async {
     try {
       await iforevents.identify(
@@ -135,6 +121,7 @@ class _IForeventsExampleState extends State<IForeventsExample> {
   }
 
   /// Ejemplo de tracking de eventos individuales
+  /// Example of tracking individual events
   Future<void> _trackSingleEvent() async {
     try {
       iforevents.track(
@@ -157,6 +144,8 @@ class _IForeventsExampleState extends State<IForeventsExample> {
   }
 
   /// Ejemplo de múltiples eventos para testing de batching
+  /// Example of multiple events for batch testing
+  // Small pause to simulate real-time events
   Future<void> _trackMultipleEvents() async {
     try {
       // Simular múltiples eventos para probar el batching
@@ -198,6 +187,7 @@ class _IForeventsExampleState extends State<IForeventsExample> {
   }
 
   /// Ejemplo de page view tracking
+  /// Example of page view tracking
   Future<void> _trackPageView() async {
     try {
       await iforevents.pageViewed(
@@ -216,6 +206,7 @@ class _IForeventsExampleState extends State<IForeventsExample> {
   }
 
   /// Ejemplo de flush manual de la cola
+  /// Example of manual queue flush
   Future<void> _flushQueue() async {
     try {
       await apiIntegration.flush();
@@ -227,6 +218,7 @@ class _IForeventsExampleState extends State<IForeventsExample> {
   }
 
   /// Ejemplo de reset de la integración
+  /// Example of integration reset
   Future<void> _resetIntegration() async {
     try {
       await iforevents.reset();
@@ -263,7 +255,7 @@ class _IForeventsExampleState extends State<IForeventsExample> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Estado de la integración
+                  // Integration status
                   Card(
                     child: Padding(
                       padding: EdgeInsets.all(16),
@@ -271,25 +263,25 @@ class _IForeventsExampleState extends State<IForeventsExample> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Estado de la Integración',
+                            'Integration Status',
                             style: Theme.of(context).textTheme.headlineSmall,
                           ),
                           SizedBox(height: 8),
                           if (queueStatus != null) ...[
                             _buildStatusRow(
-                              'Inicializada',
+                              'Initialized',
                               queueStatus!.isInitialized,
                             ),
                             _buildStatusRow(
-                              'Usuario identificado',
+                              'User Identified',
                               queueStatus!.isIdentified,
                             ),
                             _buildStatusRow(
-                              'Eventos en cola',
+                              'Queued Events',
                               queueStatus!.queuedEvents,
                             ),
                             _buildStatusRow(
-                              'Tamaño de lote',
+                              'Batch Size',
                               queueStatus!.batchSize,
                             ),
                             if (queueStatus!.sessionUUID != null)
@@ -311,9 +303,9 @@ class _IForeventsExampleState extends State<IForeventsExample> {
 
                   SizedBox(height: 16),
 
-                  // Botones de acción
+                  // Action buttons
                   Text(
-                    'Acciones de Testing',
+                    'Testing Actions',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   SizedBox(height: 8),
@@ -323,7 +315,7 @@ class _IForeventsExampleState extends State<IForeventsExample> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                     ),
-                    child: Text('1. Identificar Usuario'),
+                    child: Text('1. Identify User'),
                   ),
 
                   SizedBox(height: 8),
@@ -333,7 +325,7 @@ class _IForeventsExampleState extends State<IForeventsExample> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                     ),
-                    child: Text('2. Enviar Evento Individual'),
+                    child: Text('2. Send Single Event'),
                   ),
 
                   SizedBox(height: 8),
@@ -343,7 +335,7 @@ class _IForeventsExampleState extends State<IForeventsExample> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                     ),
-                    child: Text('3. Enviar Múltiples Eventos (Batch Test)'),
+                    child: Text('3. Send Multiple Events (Batch Test)'),
                   ),
 
                   SizedBox(height: 8),
@@ -359,7 +351,7 @@ class _IForeventsExampleState extends State<IForeventsExample> {
                   SizedBox(height: 16),
 
                   Text(
-                    'Gestión de Cola',
+                    'Queue Management',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   SizedBox(height: 8),
@@ -369,7 +361,7 @@ class _IForeventsExampleState extends State<IForeventsExample> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.amber,
                     ),
-                    child: Text('Vaciar Cola Manualmente'),
+                    child: Text('Flush Queue Manually'),
                   ),
 
                   SizedBox(height: 8),
@@ -379,7 +371,7 @@ class _IForeventsExampleState extends State<IForeventsExample> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                     ),
-                    child: Text('Reset Integración'),
+                    child: Text('Reset Integration'),
                   ),
 
                   SizedBox(height: 8),
@@ -389,12 +381,12 @@ class _IForeventsExampleState extends State<IForeventsExample> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.grey,
                     ),
-                    child: Text('Actualizar Estado'),
+                    child: Text('Update Status'),
                   ),
 
                   SizedBox(height: 32),
 
-                  // Información adicional
+                  // Additional information
                   Card(
                     child: Padding(
                       padding: EdgeInsets.all(16),
@@ -402,16 +394,16 @@ class _IForeventsExampleState extends State<IForeventsExample> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Información de Uso',
+                            'Usage Information',
                             style: Theme.of(context).textTheme.headlineSmall,
                           ),
                           SizedBox(height: 8),
                           Text(
-                            '• La integración está configurada en modo debug con logs habilitados\n'
-                            '• Los eventos se agrupan en lotes de 5 para testing\n'
-                            '• Los lotes se procesan cada 3 segundos\n'
-                            '• Los errores lanzan excepciones para debugging\n'
-                            '• Los eventos fallidos se re-encolan automáticamente',
+                            '• The integration is configured in debug mode with logs enabled\n'
+                            '• Events are grouped in batches of 5 for testing\n'
+                            '• Batches are processed every 3 seconds\n'
+                            '• Errors throw exceptions for debugging\n'
+                            '• Failed events are automatically re-queued',
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                         ],
@@ -431,10 +423,16 @@ class _IForeventsExampleState extends State<IForeventsExample> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: TextStyle(fontWeight: FontWeight.w500)),
-          Text(
-            value.toString(),
-            style: TextStyle(
-              color: value is bool ? (value ? Colors.green : Colors.red) : null,
+          SizedBox(
+            width: 100,
+            child: Text(
+              value.toString(),
+              style: TextStyle(
+                color: value is bool
+                    ? (value ? Colors.green : Colors.red)
+                    : null,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ),
         ],
@@ -451,9 +449,10 @@ class _IForeventsExampleState extends State<IForeventsExample> {
 }
 
 /// Ejemplos de configuraciones específicas para diferentes casos de uso
+/// Examples of specific configurations for different use cases
 
 class IForeventsConfigExamples {
-  /// Configuración para aplicaciones de producción
+  /// Configuration for production applications
   static IForeventsAPIConfig production({
     required String projectKey,
     required String projectSecret,
@@ -463,10 +462,10 @@ class IForeventsConfigExamples {
       projectKey: projectKey,
       projectSecret: projectSecret,
       baseUrl: baseUrl,
-      batchSize: 20, // Lotes más grandes para eficiencia
-      batchIntervalMs: 10000, // Revisar cada 10 segundos
-      enableLogging: false, // Sin logs en producción
-      throwOnError: false, // No lanzar excepciones en producción
+      batchSize: 20, // Larger batches for efficiency
+      batchIntervalMs: 10000, // Check every 10 seconds
+      enableLogging: false, // No logs in production
+      throwOnError: false, // Do not throw exceptions in production
       enableRetry: true,
       maxRetries: 3,
       retryDelayMs: 2000,
@@ -476,6 +475,7 @@ class IForeventsConfigExamples {
   }
 
   /// Configuración para desarrollo y testing
+  /// Configuration for development and testing
   static IForeventsAPIConfig development({
     required String projectKey,
     required String projectSecret,
@@ -485,10 +485,10 @@ class IForeventsConfigExamples {
       projectKey: projectKey,
       projectSecret: projectSecret,
       baseUrl: baseUrl,
-      batchSize: 5, // Lotes pequeños para testing
-      batchIntervalMs: 3000, // Revisar frecuentemente
-      enableLogging: true, // Logs detallados
-      throwOnError: true, // Lanzar excepciones para debugging
+      batchSize: 5, // Small batches for testing
+      batchIntervalMs: 3000, // Check frequently
+      enableLogging: true, // Detailed logs
+      throwOnError: true, // Throw exceptions for debugging
       enableRetry: true,
       maxRetries: 2,
       retryDelayMs: 1000,
@@ -496,6 +496,7 @@ class IForeventsConfigExamples {
   }
 
   /// Configuración para aplicaciones offline-first
+  /// Configuration for offline-first applications
   static IForeventsAPIConfig offlineFirst({
     required String projectKey,
     required String projectSecret,
@@ -505,18 +506,19 @@ class IForeventsConfigExamples {
       projectKey: projectKey,
       projectSecret: projectSecret,
       baseUrl: baseUrl,
-      batchSize: 100, // Lotes muy grandes
-      batchIntervalMs: 30000, // Revisar cada 30 segundos
+      batchSize: 100, // Very large batches
+      batchIntervalMs: 30000, // Check every 30 seconds
       enableRetry: true,
-      maxRetries: 5, // Más reintentos
+      maxRetries: 5, // More retries
       retryDelayMs: 3000,
-      requeueFailedEvents: true, // Reencolar eventos fallidos
+      requeueFailedEvents: true, // Re-queue failed events
       connectTimeoutMs: 20000,
       receiveTimeoutMs: 20000,
     );
   }
 
   /// Configuración para envío en tiempo real (sin batching)
+  /// Configuration for real-time sending (no batching)
   static IForeventsAPIConfig realTime({
     required String projectKey,
     required String projectSecret,
@@ -526,7 +528,7 @@ class IForeventsConfigExamples {
       projectKey: projectKey,
       projectSecret: projectSecret,
       baseUrl: baseUrl,
-      batchSize: 1, // Sin batching
+      batchSize: 1, // No batching
       enableRetry: true,
       maxRetries: 2,
       retryDelayMs: 500,
