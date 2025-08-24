@@ -1,3 +1,14 @@
+## 0.0.2
+
+**Multi-Platform Support** 🌐
+
+### ✨ Improvements
+
+* **Complete Platform Coverage**: Added support for Web, macOS, Linux, and Windows platforms
+* **Enhanced Compatibility**: Updated to work with IForEvents 0.0.2 multi-platform support
+
+---
+
 ## 0.0.1
 
 **Initial Release** 📈

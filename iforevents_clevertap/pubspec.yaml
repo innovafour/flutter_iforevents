@@ -1,6 +1,6 @@
 name: iforevents_clevertap
 description: "CleverTap customer engagement integration for IForEvents - Advanced user analytics, segmentation, and personalized messaging."
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/innovafour/flutter_iforevents
 repository: https://github.com/innovafour/flutter_iforevents
 issue_tracker: https://github.com/innovafour/flutter_iforevents/issues

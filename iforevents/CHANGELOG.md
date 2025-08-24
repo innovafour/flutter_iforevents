@@ -1,3 +1,34 @@
+## 0.0.2
+
+**Multi-Platform Support** 🌐
+
+### ✨ New Features
+
+* **Complete Platform Coverage**: Added support for Web, macOS, and Linux platforms
+* **Enhanced Device Detection**: Improved device information collection across all platforms
+* **Universal Device ID**: Added UUID fallback for platforms without native device IDs
+* **Cross-Platform Compatibility**: Package now works on all Flutter-supported platforms
+
+### 🔧 Technical Improvements
+
+* Added `uuid` dependency for universal device ID generation
+* Enhanced `deviceData` method with platform-specific information collection
+* Added explicit platform declarations in `pubspec.yaml`
+* Improved error handling for unsupported platform scenarios
+
+### 📱 Platform Support
+
+* **Web**: Browser detection and web-specific device information
+* **macOS**: System GUID and macOS device details
+* **Linux**: Machine ID and Linux distribution information
+* **Android/iOS/Windows**: Enhanced existing platform support
+
+### 🛠 Breaking Changes
+
+None - maintains full backward compatibility.
+
+---
+
 ## 0.0.1
 
 **Initial Release** 🎉
