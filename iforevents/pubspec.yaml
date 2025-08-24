@@ -6,8 +6,6 @@ repository: https://github.com/innovafour/flutter_iforevents
 issue_tracker: https://github.com/innovafour/flutter_iforevents/issues
 documentation: https://pub.dev/documentation/iforevents/latest/
 
-publish_to: 'https://pub.dev'
-
 environment:
   sdk: ^3.8.1
   flutter: ">=1.17.0"

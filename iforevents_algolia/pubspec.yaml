@@ -1,7 +1,10 @@
 name: iforevents_algolia
-description: "A new Flutter package project."
+description: "Algolia search analytics integration for IForEvents - Track search behavior, product interactions, and user engagement insights."
 version: 0.0.1
 homepage: https://github.com/innovafour/flutter_iforevents
+repository: https://github.com/innovafour/flutter_iforevents
+issue_tracker: https://github.com/innovafour/flutter_iforevents/issues
+documentation: https://pub.dev/documentation/iforevents_algolia/latest/
 
 environment:
   sdk: ^3.8.1
@@ -11,8 +14,7 @@ dependencies:
   flutter:
     sdk: flutter
   algolia_insights: ^1.0.3
-  iforevents:
-    path: ../iforevents
+  iforevents: ^0.0.1
 
 dev_dependencies:
   flutter_test:

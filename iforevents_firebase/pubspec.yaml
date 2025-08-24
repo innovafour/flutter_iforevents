@@ -1,7 +1,10 @@
 name: iforevents_firebase
-description: "An Iforevents extension for Firebase integration."
+description: "Firebase Analytics integration for IForEvents - Seamless event tracking and user analytics through Firebase platform."
 version: 0.0.1
-homepage: https://github.com/innovafour/iforevents
+homepage: https://github.com/innovafour/flutter_iforevents
+repository: https://github.com/innovafour/flutter_iforevents
+issue_tracker: https://github.com/innovafour/flutter_iforevents/issues
+documentation: https://pub.dev/documentation/iforevents_firebase/latest/
 
 environment:
   sdk: ^3.8.1
@@ -11,8 +14,7 @@ dependencies:
   flutter:
     sdk: flutter
   firebase_analytics: ^12.0.0
-  iforevents:
-    path: ../iforevents
+  iforevents: ^0.0.1
 
 dev_dependencies:
   flutter_test:
