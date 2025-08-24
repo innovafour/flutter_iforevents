@@ -46,7 +46,6 @@ class _MyAppState extends State<MyApp> {
       batchIntervalMs: 3000,
       enableLogging: true,
       throwOnError: false,
-      requireIdentifyBeforeTrack: true,
     );
 
     await iforevents.init(

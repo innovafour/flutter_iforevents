@@ -14,7 +14,6 @@ class IForeventsAPIConfig {
     this.retryDelayMs = 1000,
     this.enableLogging = false,
     this.throwOnError = false,
-    this.requireIdentifyBeforeTrack = true,
     this.requeueFailedEvents = true,
   });
 
@@ -58,9 +57,6 @@ class IForeventsAPIConfig {
   /// Throw exceptions on errors instead of just logging (default: false)
   final bool throwOnError;
 
-  /// Require identify() to be called before track() (default: true)
-  final bool requireIdentifyBeforeTrack;
-
   /// Re-queue failed events for retry (default: true)
   final bool requeueFailedEvents;
 
@@ -78,7 +74,6 @@ class IForeventsAPIConfig {
     int? retryDelayMs,
     bool? enableLogging,
     bool? throwOnError,
-    bool? requireIdentifyBeforeTrack,
     bool? requeueFailedEvents,
   }) {
     return IForeventsAPIConfig(
@@ -95,8 +90,6 @@ class IForeventsAPIConfig {
       retryDelayMs: retryDelayMs ?? this.retryDelayMs,
       enableLogging: enableLogging ?? this.enableLogging,
       throwOnError: throwOnError ?? this.throwOnError,
-      requireIdentifyBeforeTrack:
-          requireIdentifyBeforeTrack ?? this.requireIdentifyBeforeTrack,
       requeueFailedEvents: requeueFailedEvents ?? this.requeueFailedEvents,
     );
   }

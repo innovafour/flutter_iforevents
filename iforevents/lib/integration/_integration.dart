@@ -10,7 +10,7 @@ class IntegrationResult {
   final String? error;
   final DateTime timestamp;
 
-  IntegrationResult({
+  const IntegrationResult({
     required this.integrationName,
     required this.success,
     this.error,

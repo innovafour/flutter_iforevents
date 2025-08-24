@@ -65,7 +65,6 @@ class _IForeventsExampleState extends State<IForeventsExample> {
       baseUrl: 'https://your-api-domain.com',
       batchSize: 1, // Immediate sending
       enableLogging: true,
-      requireIdentifyBeforeTrack: false, // Allow tracking without identifying
     );
 
     // Example 4: High frequency configuration

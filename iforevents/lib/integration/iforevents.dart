@@ -157,9 +157,8 @@ class IForeventsAPIIntegration extends Integration {
   @override
   Future<void> init() async {
     try {
-      await super.init();
+      super.init();
 
-      // Cargar el sessionUUID guardado localmente si no está ya cargado
       if (_sessionUUID == null) {
         _sessionUUID = _storage.read(_sessionUUIDKey);
         if (_sessionUUID != null) {
@@ -203,7 +202,7 @@ class IForeventsAPIIntegration extends Integration {
 
   @override
   Future<void> identify({required IdentifyEvent event}) async {
-    await super.identify(event: event);
+    super.identify(event: event);
 
     if (!_isInitialized) {
       throw IForeventsAPIException(
@@ -224,7 +223,6 @@ class IForeventsAPIIntegration extends Integration {
           final newSessionUUID = session['uuid'] as String?;
           _userUUID = session['user_uuid'] as String?;
 
-          // Actualizar sessionUUID y guardarlo localmente
           if (newSessionUUID != null) {
             _sessionUUID = newSessionUUID;
             await _storage.write(_sessionUUIDKey, _sessionUUID);
@@ -264,7 +262,7 @@ class IForeventsAPIIntegration extends Integration {
 
   @override
   Future<void> track({required TrackEvent event}) async {
-    await super.track(event: event);
+    super.track(event: event);
 
     if (!_isInitialized) {
       throw IForeventsAPIException(
@@ -298,7 +296,7 @@ class IForeventsAPIIntegration extends Integration {
 
   @override
   Future<void> pageView({required PageViewEvent event}) async {
-    await super.pageView(event: event);
+    super.pageView(event: event);
 
     if (!_isInitialized) {
       throw IForeventsAPIException(
@@ -322,7 +320,7 @@ class IForeventsAPIIntegration extends Integration {
   @override
   Future<void> reset() async {
     try {
-      await super.reset();
+      super.reset();
 
       // Send any remaining queued events before resetting
       if (_eventQueue.isNotEmpty) {

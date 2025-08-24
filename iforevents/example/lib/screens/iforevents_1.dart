@@ -35,7 +35,6 @@ class _IForeventsAPIExamplePageState extends State<IForeventsAPIExamplePage> {
         batchIntervalMs: 3000, // Check every 3 seconds
         enableLogging: true, // Enable logs for development
         throwOnError: false, // Do not throw exceptions
-        requireIdentifyBeforeTrack: true, // Require identify before track
       );
 
       // Create the integration
