@@ -1,6 +1,6 @@
 name: iforevents_algolia
 description: "Algolia search analytics integration for IForEvents - Track search behavior, product interactions, and user engagement insights."
-version: 0.0.2
+version: 0.0.3
 homepage: https://github.com/innovafour/flutter_iforevents
 repository: https://github.com/innovafour/flutter_iforevents
 issue_tracker: https://github.com/innovafour/flutter_iforevents/issues
