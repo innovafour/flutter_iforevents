@@ -5,7 +5,7 @@
 ### ✨ Improvements
 
 * **Complete Platform Coverage**: Added support for Web, macOS, Linux, and Windows platforms
-* **Enhanced Compatibility**: Updated to work with IForEvents 0.0.2 multi-platform support
+* **Enhanced Compatibility**: Updated to work with IForEvents 0.0.3 multi-platform support
 
 ---
 

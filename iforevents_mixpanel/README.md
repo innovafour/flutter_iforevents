@@ -24,7 +24,7 @@ Add this to your package's `pubspec.yaml` file:
 ```yaml
 dependencies:
   iforevents: ^0.0.3
-  iforevents_mixpanel: ^0.0.1
+  iforevents_mixpanel: ^0.0.3
 ```
 
 Then run:

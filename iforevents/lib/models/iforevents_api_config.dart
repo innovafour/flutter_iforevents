@@ -3,7 +3,7 @@ class IForeventsAPIConfig {
   const IForeventsAPIConfig({
     required this.projectKey,
     required this.projectSecret,
-    required this.baseUrl,
+    this.baseUrl = 'https://api.iforevents.com',
     this.batchSize = 10,
     this.batchIntervalMs = 5000,
     this.connectTimeoutMs = 10000,
@@ -23,7 +23,7 @@ class IForeventsAPIConfig {
   /// Project API secret (required)
   final String projectSecret;
 
-  /// Base URL for the IForevents API (required)
+  /// Base URL for the IForevents API (default: https://api.iforevents.com)
   final String baseUrl;
 
   /// Number of events to batch before sending (default: 10)
