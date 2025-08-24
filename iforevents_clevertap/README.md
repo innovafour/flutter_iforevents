@@ -24,7 +24,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  iforevents: ^0.0.1
+  iforevents: ^0.0.2
   iforevents_clevertap: ^0.0.1
 ```
 

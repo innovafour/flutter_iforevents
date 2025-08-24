@@ -136,7 +136,7 @@ This is the first public release of IforEvents, a comprehensive Flutter package 
 **Getting Started:**
 ```yaml
 dependencies:
-  iforevents: ^0.0.1
+  iforevents: ^0.0.2
   iforevents_firebase: ^0.0.1  # Optional
   iforevents_mixpanel: ^0.0.1  # Optional
 ```

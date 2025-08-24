@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:android_id/android_id.dart';
 import 'package:dart_ipify/dart_ipify.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:iforevents/integration/_integration.dart';
 import 'package:iforevents/models/device.dart';
 import 'package:iforevents/models/pending_event.dart';
@@ -12,6 +13,7 @@ import 'package:iforevents/services/event_storage_service.dart';
 import 'package:iforevents/services/background_processor.dart';
 import 'package:iforevents/config/retry_config.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:uuid/uuid.dart';
 
 export 'package:iforevents/integration/_integration.dart';
 export 'package:iforevents/integration/iforevents.dart';
@@ -219,63 +221,216 @@ class Iforevents {
 
     final deviceIP = await ip;
 
-    switch (Platform.operatingSystem) {
-      case 'android':
-        final androidInfo = await deviceInfoPlugin.androidInfo;
+    // Generate a unique ID using UUID for platforms that don't have platform-specific IDs
+    const uuid = Uuid();
+    final fallbackId = uuid.v4();
 
-        result = {
-          'id': await const AndroidId().getId(),
-          'ip': deviceIP,
-          'brand': androidInfo.brand,
-          'model': androidInfo.model,
-          'os_version': androidInfo.version.sdkInt.toString(),
-          'app_version': appVersion,
-          'platform': 'android',
-          'data': {
-            'device': androidInfo.device,
-            'sdk_int': androidInfo.version.sdkInt,
-            'is_physical_device': androidInfo.isPhysicalDevice,
-            ...packageInfoData,
-          },
-        };
-        break;
+    if (kIsWeb) {
+      // Web platform
+      final webInfo = await deviceInfoPlugin.webBrowserInfo;
 
-      case 'ios':
-        final iosInfo = await deviceInfoPlugin.iosInfo;
+      result = {
+        'id': fallbackId,
+        'ip': deviceIP,
+        'brand': webInfo.browserName.name,
+        'model': webInfo.platform ?? 'Unknown',
+        'os_version': webInfo.appVersion ?? 'Unknown',
+        'app_version': appVersion,
+        'platform': 'web',
+        'data': {
+          'browser_name': webInfo.browserName.name,
+          'app_name': webInfo.appName,
+          'app_version': webInfo.appVersion,
+          'device_memory': webInfo.deviceMemory,
+          'language': webInfo.language,
+          'languages': webInfo.languages,
+          'platform': webInfo.platform,
+          'product': webInfo.product,
+          'product_sub': webInfo.productSub,
+          'user_agent': webInfo.userAgent,
+          'vendor': webInfo.vendor,
+          'vendor_sub': webInfo.vendorSub,
+          'hardware_concurrency': webInfo.hardwareConcurrency,
+          'max_touch_points': webInfo.maxTouchPoints,
+          ...packageInfoData,
+        },
+      };
+    } else {
+      switch (Platform.operatingSystem) {
+        case 'android':
+          final androidInfo = await deviceInfoPlugin.androidInfo;
 
-        result = {
-          'id': iosInfo.identifierForVendor,
-          'ip': deviceIP,
-          'brand': iosInfo.name,
-          'model': iosInfo.model,
-          'os_version': iosInfo.systemVersion,
-          'app_version': appVersion,
-          'platform': 'ios',
-          'data': {
-            'system_name': iosInfo.systemName,
-            'is_physical_device': iosInfo.isPhysicalDevice,
-            ...packageInfoData,
-          },
-        };
-        break;
-      case 'windows':
-        final windowsInfo = await deviceInfoPlugin.windowsInfo;
+          result = {
+            'id': await const AndroidId().getId(),
+            'ip': deviceIP,
+            'brand': androidInfo.brand,
+            'model': androidInfo.model,
+            'os_version': androidInfo.version.sdkInt.toString(),
+            'app_version': appVersion,
+            'platform': 'android',
+            'data': {
+              'device': androidInfo.device,
+              'sdk_int': androidInfo.version.sdkInt,
+              'is_physical_device': androidInfo.isPhysicalDevice,
+              'manufacturer': androidInfo.manufacturer,
+              'product': androidInfo.product,
+              'tags': androidInfo.tags,
+              'type': androidInfo.type,
+              'version_base_os': androidInfo.version.baseOS,
+              'version_codename': androidInfo.version.codename,
+              'version_incremental': androidInfo.version.incremental,
+              'version_preview_sdk_int': androidInfo.version.previewSdkInt,
+              'version_release': androidInfo.version.release,
+              'version_security_patch': androidInfo.version.securityPatch,
+              'board': androidInfo.board,
+              'bootloader': androidInfo.bootloader,
+              'brand': androidInfo.brand,
+              'display': androidInfo.display,
+              'fingerprint': androidInfo.fingerprint,
+              'hardware': androidInfo.hardware,
+              'host': androidInfo.host,
+              'id': androidInfo.id,
+              'supported32_bit_abis': androidInfo.supported32BitAbis,
+              'supported64_bit_abis': androidInfo.supported64BitAbis,
+              'supported_abis': androidInfo.supportedAbis,
+              ...packageInfoData,
+            },
+          };
+          break;
 
-        result = {
-          'id': windowsInfo.deviceId,
-          'ip': deviceIP,
-          'brand': windowsInfo.computerName,
-          'model': windowsInfo.displayVersion,
-          'os_version': windowsInfo.buildNumber.toString(),
-          'app_version': appVersion,
-          'platform': 'windows',
-          'data': {...packageInfoData},
-        };
-        break;
-      default:
-        result = {'error': 'OS not supported or not detected'};
+        case 'ios':
+          final iosInfo = await deviceInfoPlugin.iosInfo;
 
-        break;
+          result = {
+            'id': iosInfo.identifierForVendor ?? fallbackId,
+            'ip': deviceIP,
+            'brand': iosInfo.name,
+            'model': iosInfo.model,
+            'os_version': iosInfo.systemVersion,
+            'app_version': appVersion,
+            'platform': 'ios',
+            'data': {
+              'system_name': iosInfo.systemName,
+              'is_physical_device': iosInfo.isPhysicalDevice,
+              'utsname_machine': iosInfo.utsname.machine,
+              'utsname_nodename': iosInfo.utsname.nodename,
+              'utsname_release': iosInfo.utsname.release,
+              'utsname_sysname': iosInfo.utsname.sysname,
+              'utsname_version': iosInfo.utsname.version,
+              'localized_model': iosInfo.localizedModel,
+              'system_version': iosInfo.systemVersion,
+              ...packageInfoData,
+            },
+          };
+          break;
+
+        case 'windows':
+          final windowsInfo = await deviceInfoPlugin.windowsInfo;
+
+          result = {
+            'id': windowsInfo.deviceId,
+            'ip': deviceIP,
+            'brand': windowsInfo.computerName,
+            'model': windowsInfo.displayVersion,
+            'os_version': windowsInfo.buildNumber.toString(),
+            'app_version': appVersion,
+            'platform': 'windows',
+            'data': {
+              'computer_name': windowsInfo.computerName,
+              'number_of_cores': windowsInfo.numberOfCores,
+              'system_memory_in_megabytes': windowsInfo.systemMemoryInMegabytes,
+              'user_name': windowsInfo.userName,
+              'build_lab': windowsInfo.buildLab,
+              'build_lab_ex': windowsInfo.buildLabEx,
+              'digital_product_id': windowsInfo.digitalProductId,
+              'display_version': windowsInfo.displayVersion,
+              'edition_id': windowsInfo.editionId,
+              'install_date': windowsInfo.installDate.toIso8601String(),
+              'product_id': windowsInfo.productId,
+              'product_name': windowsInfo.productName,
+              'registered_owner': windowsInfo.registeredOwner,
+              'release_id': windowsInfo.releaseId,
+              'device_id': windowsInfo.deviceId,
+              ...packageInfoData,
+            },
+          };
+          break;
+
+        case 'macos':
+          final macosInfo = await deviceInfoPlugin.macOsInfo;
+
+          result = {
+            'id': macosInfo.systemGUID ?? fallbackId,
+            'ip': deviceIP,
+            'brand': 'Apple',
+            'model': macosInfo.model,
+            'os_version': macosInfo.osRelease,
+            'app_version': appVersion,
+            'platform': 'macos',
+            'data': {
+              'computer_name': macosInfo.computerName,
+              'host_name': macosInfo.hostName,
+              'arch': macosInfo.arch,
+              'model': macosInfo.model,
+              'kernel_version': macosInfo.kernelVersion,
+              'major_version': macosInfo.majorVersion,
+              'minor_version': macosInfo.minorVersion,
+              'patch_version': macosInfo.patchVersion,
+              'os_release': macosInfo.osRelease,
+              'activeCPUs': macosInfo.activeCPUs,
+              'memorySize': macosInfo.memorySize,
+              'cpuFrequency': macosInfo.cpuFrequency,
+              'system_guid': macosInfo.systemGUID,
+              ...packageInfoData,
+            },
+          };
+          break;
+
+        case 'linux':
+          final linuxInfo = await deviceInfoPlugin.linuxInfo;
+
+          result = {
+            'id': linuxInfo.machineId ?? fallbackId,
+            'ip': deviceIP,
+            'brand': linuxInfo.prettyName,
+            'model': linuxInfo.variant ?? 'Unknown',
+            'os_version': linuxInfo.versionId ?? 'Unknown',
+            'app_version': appVersion,
+            'platform': 'linux',
+            'data': {
+              'name': linuxInfo.name,
+              'version': linuxInfo.version,
+              'id': linuxInfo.id,
+              'id_like': linuxInfo.idLike,
+              'version_codename': linuxInfo.versionCodename,
+              'version_id': linuxInfo.versionId,
+              'pretty_name': linuxInfo.prettyName,
+              'build_id': linuxInfo.buildId,
+              'variant': linuxInfo.variant,
+              'variant_id': linuxInfo.variantId,
+              'machine_id': linuxInfo.machineId,
+              ...packageInfoData,
+            },
+          };
+          break;
+
+        default:
+          result = {
+            'id': fallbackId,
+            'ip': deviceIP,
+            'brand': 'Unknown',
+            'model': 'Unknown',
+            'os_version': 'Unknown',
+            'app_version': appVersion,
+            'platform': Platform.operatingSystem,
+            'data': {
+              'error': 'OS not supported or not detected',
+              'platform_detected': Platform.operatingSystem,
+              ...packageInfoData,
+            },
+          };
+          break;
+      }
     }
 
     final device = Device.fromMap(result);

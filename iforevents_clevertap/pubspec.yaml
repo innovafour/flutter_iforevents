@@ -10,11 +10,19 @@ environment:
   sdk: ^3.8.1
   flutter: ">=1.17.0"
 
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
+
 dependencies:
   flutter:
     sdk: flutter
   clevertap_plugin: ^3.5.0
-  iforevents: ^0.0.1
+  iforevents: ^0.0.2
 
 dev_dependencies:
   flutter_test:
