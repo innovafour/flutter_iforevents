@@ -22,7 +22,7 @@ dependencies:
   flutter:
     sdk: flutter
   facebook_app_events: ^0.20.1
-  iforevents: ^0.0.2
+  iforevents: ^0.0.3
 
 dev_dependencies:
   flutter_test:

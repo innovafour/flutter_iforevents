@@ -79,7 +79,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  iforevents: ^0.0.2
+  iforevents: ^0.0.3
   # Add the integrations you need
   iforevents_firebase: ^0.0.1
   iforevents_mixpanel: ^0.0.1

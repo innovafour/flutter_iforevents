@@ -22,7 +22,7 @@ dependencies:
   flutter:
     sdk: flutter
   algolia_insights: ^1.0.3
-  iforevents: ^0.0.2
+  iforevents: ^0.0.3
 
 dev_dependencies:
   flutter_test:
