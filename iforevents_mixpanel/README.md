@@ -247,12 +247,12 @@ iforevents.track(
 ### User Engagement Tracking
 
 ```dart
-// Session tracking
+// User tracking
 iforevents.track(
   event: TrackEvent(
-    eventName: 'session_started',
+    eventName: 'user_started',
     properties: {
-      'session_id': 'sess_123',
+      'user_id': 'sess_123',
       'entry_point': 'home_screen',
     },
   ),
@@ -260,10 +260,10 @@ iforevents.track(
 
 iforevents.track(
   event: TrackEvent(
-    eventName: 'session_ended',
+    eventName: 'user_ended',
     properties: {
-      'session_id': 'sess_123',
-      'session_duration': 480, // seconds
+      'user_id': 'sess_123',
+      'user_duration': 480, // seconds
       'pages_viewed': 5,
       'actions_taken': 12,
     },

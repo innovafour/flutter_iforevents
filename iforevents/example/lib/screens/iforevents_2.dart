@@ -280,10 +280,10 @@ class _IForeventsExampleState extends State<IForeventsExample> {
                               label: 'Batch Size',
                               value: queueStatus!.batchSize,
                             ),
-                            if (queueStatus!.sessionUUID != null)
+                            if (queueStatus!.userUUID != null)
                               _StatusRow(
-                                label: 'Session UUID',
-                                value: queueStatus!.sessionUUID!,
+                                label: 'User UUID',
+                                value: queueStatus!.userUUID!,
                               ),
                             if (queueStatus!.userUUID != null)
                               _StatusRow(

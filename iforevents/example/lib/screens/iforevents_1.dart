@@ -146,7 +146,7 @@ class _IForeventsAPIExamplePageState extends State<IForeventsAPIExamplePage> {
       final status = apiIntegration!.getQueueStatus();
       return 'Queue: ${status.queuedEvents}/${status.batchSize} events, '
           'Identified: ${status.isIdentified}, '
-          'Session: ${status.sessionUUID ?? 'None'}';
+          'User: ${status.userUUID ?? 'None'}';
     }
     return 'API Integration not available';
   }

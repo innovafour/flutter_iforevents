@@ -139,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
           'event_type': 'user_interaction',
           'feature': 'quick_actions',
           'user_engagement': 'high',
-          'session_time': DateTime.now().millisecondsSinceEpoch,
+          'user_time': DateTime.now().millisecondsSinceEpoch,
         },
       ),
     );

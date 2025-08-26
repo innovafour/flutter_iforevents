@@ -30,7 +30,7 @@ This is the first release of IForEvents Mixpanel Integration, providing comprehe
 * **User Aliasing**: Smart user aliasing to connect anonymous and identified users
 * **Profile Management**: Comprehensive user profile property management
 * **Property Handling**: Intelligent property filtering and data cleaning
-* **Distinct ID Management**: Robust distinct ID handling and user session management
+* **Distinct ID Management**: Robust distinct ID handling and user user management
 * **Data Validation**: Automatic data validation and cleaning for reliable analytics
 * **Batch Processing**: Efficient event batching and flushing for optimal performance
 

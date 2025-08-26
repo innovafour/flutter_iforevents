@@ -441,7 +441,7 @@ class _StatsCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Session Stats',
+              'User Stats',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,

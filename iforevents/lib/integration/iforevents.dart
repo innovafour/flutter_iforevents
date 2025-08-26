@@ -9,14 +9,14 @@ import 'package:iforevents/models/iforevents_api_config.dart';
 /// IForevents API Integration for Flutter
 ///
 /// A comprehensive integration for the IForevents API that supports:
-/// - User identification and session management
+/// - User identification and user management
 /// - Individual event tracking
 /// - Batch event processing (recommended)
 /// - Customizable configuration
 /// - Offline event queuing
 /// - Error handling and retry logic
 ///
-/// This class implements a singleton pattern to ensure session state
+/// This class implements a singleton pattern to ensure user state
 /// persistence across the application lifecycle.
 ///
 /// Usage:
@@ -50,17 +50,13 @@ class IForeventsAPIIntegration extends Integration {
   final Dio _dio;
   final GetStorage _storage = GetStorage();
 
-  static const String _sessionUUIDKey = 'iforevents_session_uuid';
+  static const String _userUUIDKey = 'iforevents_user_uuid';
 
-  String? _sessionUUID;
   String? _userUUID;
   final List<IForeventsQueuedEvent> _eventQueue = [];
   Timer? _batchTimer;
   bool _isInitialized = false;
   bool _isIdentified = false;
-
-  /// Session UUID from the last identify call
-  String? get sessionUUID => _sessionUUID;
 
   /// User UUID from the last identify call
   String? get userUUID => _userUUID;
@@ -96,8 +92,8 @@ class IForeventsAPIIntegration extends Integration {
             'X-Project-Secret': config.projectSecret,
           });
 
-          if (_sessionUUID != null) {
-            options.headers['X-Session-UUID'] = _sessionUUID;
+          if (_userUUID != null) {
+            options.headers['X-User-UUID'] = _userUUID;
           }
 
           if (config.enableLogging) {
@@ -159,14 +155,14 @@ class IForeventsAPIIntegration extends Integration {
     try {
       super.init();
 
-      if (_sessionUUID == null) {
-        _sessionUUID = _storage.read(_sessionUUIDKey);
-        if (_sessionUUID != null) {
+      if (_userUUID == null) {
+        _userUUID = _storage.read(_userUUIDKey);
+        if (_userUUID != null) {
           _isIdentified = true;
 
           if (config.enableLogging) {
             developer.log(
-              'Loaded saved sessionUUID: $_sessionUUID',
+              'Loaded saved userUUID: $_userUUID',
               name: 'IForeventsAPI',
             );
           }
@@ -174,7 +170,7 @@ class IForeventsAPIIntegration extends Integration {
       } else {
         if (config.enableLogging) {
           developer.log(
-            'SessionUUID already loaded in singleton: $_sessionUUID',
+            'UserUUID already loaded in singleton: $_userUUID',
             name: 'IForeventsAPI',
           );
         }
@@ -217,19 +213,17 @@ class IForeventsAPIIntegration extends Integration {
 
       if (response.data != null) {
         final responseData = response.data as Map<String, dynamic>;
-        final session = responseData['session'] as Map<String, dynamic>?;
+        final user = responseData['user'] as Map<String, dynamic>?;
 
-        if (session != null) {
-          final newSessionUUID = session['uuid'] as String?;
-          _userUUID = session['user_uuid'] as String?;
+        if (user != null) {
+          final userUUID = user['uuid'] as String?;
 
-          if (newSessionUUID != null) {
-            _sessionUUID = newSessionUUID;
-            await _storage.write(_sessionUUIDKey, _sessionUUID);
+          if (userUUID != null) {
+            await _storage.write(_userUUIDKey, userUUID);
 
             if (config.enableLogging) {
               developer.log(
-                'SessionUUID updated and saved: $_sessionUUID',
+                'UserUUID updated and saved: $userUUID',
                 name: 'IForeventsAPI',
               );
             }
@@ -239,7 +233,7 @@ class IForeventsAPIIntegration extends Integration {
 
           if (config.enableLogging) {
             developer.log(
-              'User identified successfully. Session: $_sessionUUID',
+              'User identified successfully. User: $userUUID',
               name: 'IForeventsAPI',
             );
           }
@@ -328,11 +322,11 @@ class IForeventsAPIIntegration extends Integration {
         _eventQueue.clear();
       }
 
-      // Clear sessionUUID both in memory and storage
-      _sessionUUID = null;
+      // Clear userUUID both in memory and storage
+      _userUUID = null;
       _userUUID = null;
       _isIdentified = false;
-      await _storage.remove(_sessionUUIDKey);
+      await _storage.remove(_userUUIDKey);
 
       if (config.enableLogging) {
         developer.log(
@@ -362,22 +356,21 @@ class IForeventsAPIIntegration extends Integration {
       batchSize: config.batchSize,
       isInitialized: _isInitialized,
       isIdentified: _isIdentified,
-      sessionUUID: _sessionUUID,
       userUUID: _userUUID,
     );
   }
 
-  /// Get the sessionUUID stored in local storage (if any)
-  String? getStoredSessionUUID() {
-    return _storage.read(_sessionUUIDKey);
+  /// Get the userUUID stored in local storage (if any)
+  String? getStoredUserUUID() {
+    return _storage.read(_userUUIDKey);
   }
 
-  /// Clear the stored sessionUUID from local storage
-  Future<void> clearStoredSessionUUID() async {
-    await _storage.remove(_sessionUUIDKey);
+  /// Clear the stored userUUID from local storage
+  Future<void> clearStoredUserUUID() async {
+    await _storage.remove(_userUUIDKey);
     if (config.enableLogging) {
       developer.log(
-        'Stored sessionUUID cleared from local storage',
+        'Stored userUUID cleared from local storage',
         name: 'IForeventsAPI',
       );
     }
@@ -558,7 +551,6 @@ class IForeventsQueueStatus {
     required this.batchSize,
     required this.isInitialized,
     required this.isIdentified,
-    this.sessionUUID,
     this.userUUID,
   });
 
@@ -566,7 +558,6 @@ class IForeventsQueueStatus {
   final int batchSize;
   final bool isInitialized;
   final bool isIdentified;
-  final String? sessionUUID;
   final String? userUUID;
 
   Map<String, dynamic> toJson() {
@@ -575,7 +566,6 @@ class IForeventsQueueStatus {
       'batch_size': batchSize,
       'is_initialized': isInitialized,
       'is_identified': isIdentified,
-      'session_uuid': sessionUUID,
       'user_uuid': userUUID,
     };
   }

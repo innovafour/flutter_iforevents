@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Simple event tracking with custom properties
   - Different event types (track, screen, identify)
   - Automatic device data inclusion
-  - Timestamp and session tracking
+  - Timestamp and user tracking
 
 - **User Identification**:
   - Unique user identification across platforms

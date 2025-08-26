@@ -458,7 +458,7 @@ Always include these properties for proper Algolia analytics:
 ### 3. User Journey Tracking
 - Track the complete search journey: search → view → interact → convert
 - Include context properties: query, position, filters
-- Use consistent user identification throughout the session
+- Use consistent user identification throughout the user
 
 ### 4. Performance Monitoring
 - Track search response times

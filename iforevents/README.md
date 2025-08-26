@@ -16,7 +16,6 @@ A comprehensive Flutter package for event tracking and analytics integration. IF
 - 🔄 **Route Tracking**: Automatic screen/route tracking
 - 🏗️ **Modular Architecture**: Add only the integrations you need
 - 🔧 **Extensible**: Create custom integrations easily
-
 ## Supported Integrations
 
 | Integration | Package | Description | Native Config Required |
@@ -595,9 +594,7 @@ abstract class Integration<T> {
 }
 ```
 
-> **⚠️ CRITICAL: @mustCallSuper Requirement**
-> 
-> All Integration methods are marked with `@mustCallSuper`, which means you **MUST** call the parent method first in your override. Failure to do so will result in missing functionality and potential bugs.
+> **⚠️ CRITICAL: All Integration methods are marked with `@mustCallSuper`, which means you **MUST** call the parent method first in your override. Failure to do so will result in missing functionality and potential bugs.
 
 ## Integration Guides
 

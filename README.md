@@ -506,7 +506,7 @@ Iforevents automatically collects comprehensive device information on every even
 This is the native integration with the Iforevents backend, included in the core `iforevents` package. It's powerful, featuring an offline queue, event batching, and automatic retries.
 
 **Features:**
-- ✅ **User identification** and session management
+- ✅ **User identification** and user management
 - ✅ **Event tracking** (individual and batch)
 - ✅ **Completely customizable configuration**
 - ✅ **Offline event queue** with automatic retries

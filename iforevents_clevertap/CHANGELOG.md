@@ -32,7 +32,7 @@ This is the first release of IForEvents CleverTap Integration, providing compreh
 * **Event Recording**: Record custom events with detailed properties
 * **Revenue Tracking**: Special charged event handling for e-commerce tracking
 * **Property Normalization**: Automatic property name formatting for CleverTap standards
-* **Session Management**: User session tracking and management
+* **User Management**: User user tracking and management
 
 ### 🎯 Special Features
 

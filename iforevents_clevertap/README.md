@@ -250,7 +250,7 @@ iforevents.track(
     properties: {
       'feature_name': 'search',
       'usage_count': 5,
-      'session_duration': 180,
+      'user_duration': 180,
     },
   ),
 );
@@ -337,7 +337,7 @@ iforevents.track(
   event: TrackEvent(
     eventName: 'app_backgrounded',
     properties: {
-      'session_duration': 450,
+      'user_duration': 450,
       'screens_viewed': 8,
       'actions_performed': 15,
     },
