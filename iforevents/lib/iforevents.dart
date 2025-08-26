@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:web/web.dart' as html;
 
 import 'package:android_id/android_id.dart';
 import 'package:dart_ipify/dart_ipify.dart';
@@ -229,8 +230,16 @@ class Iforevents {
       // Web platform
       final webInfo = await deviceInfoPlugin.webBrowserInfo;
 
+      const storageKey = "iforevents_device_id";
+      String? storedId = html.window.localStorage.getItem(storageKey);
+
+      if (storedId == null) {
+        storedId = const Uuid().v4();
+        html.window.localStorage.setItem(storageKey, storedId);
+      }
+
       result = {
-        'id': fallbackId,
+        'id': storedId,
         'ip': deviceIP,
         'brand': webInfo.browserName.name,
         'model': webInfo.platform ?? 'Unknown',
