@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-import 'package:web/web.dart' as html;
 
 import 'package:android_id/android_id.dart';
 import 'package:dart_ipify/dart_ipify.dart';
@@ -15,6 +14,10 @@ import 'package:iforevents/services/background_processor.dart';
 import 'package:iforevents/config/retry_config.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:uuid/uuid.dart';
+
+// Conditional import for web storage
+import 'utils/web_storage_stub.dart'
+    if (dart.library.html) 'utils/web_storage.dart';
 
 export 'package:iforevents/integration/_integration.dart';
 export 'package:iforevents/integration/iforevents.dart';
@@ -231,11 +234,11 @@ class Iforevents {
       final webInfo = await deviceInfoPlugin.webBrowserInfo;
 
       const storageKey = "iforevents_device_id";
-      String? storedId = html.window.localStorage.getItem(storageKey);
+      String? storedId = WebStorage.getItem(storageKey);
 
       if (storedId == null) {
         storedId = const Uuid().v4();
-        html.window.localStorage.setItem(storageKey, storedId);
+        WebStorage.setItem(storageKey, storedId);
       }
 
       result = {

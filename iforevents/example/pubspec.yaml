@@ -36,10 +36,16 @@ dependencies:
   cupertino_icons: ^1.0.8
   iforevents:
     path: ../
+  iforevents_amplitude:
+    path: ../../iforevents_amplitude
   iforevents_firebase:
     path: ../../iforevents_firebase
   iforevents_mixpanel:
     path: ../../iforevents_mixpanel
+
+dependency_overrides: 
+  iforevents:
+    path: ../
 
 dev_dependencies:
   flutter_test:

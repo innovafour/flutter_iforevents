@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:iforevents/iforevents.dart';
 import 'package:iforevents/models/iforevents_api_config.dart';
 import 'package:iforevents/utils/navigator_observer.dart';
+import 'package:iforevents_amplitude/iforevents_amplitude.dart';
 import 'package:iforevents_mixpanel/iforevents_mixpanel.dart';
 
+import 'screens/amplitude_demo_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/settings_screen.dart';
@@ -30,6 +32,15 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final Iforevents iforevents = const Iforevents();
 
+  // Amplitude integration instance - replace with your actual API key
+  final AmplitudeIntegration amplitudeIntegration = const AmplitudeIntegration(
+    apiKey: '<YOUR_AMPLITUDE_API_KEY>',
+    flushQueueSize: 30,
+    flushIntervalMillis: 30000,
+    optOut: false,
+    useBatch: false,
+  );
+
   @override
   void initState() {
     super.initState();
@@ -38,9 +49,8 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _initializeAnalytics() async {
     final config = IForeventsAPIConfig(
-      projectKey: '155d3a6765fac771841c4129e68f50a0',
-      projectSecret:
-          'ec73ec62620f275de58fe25e3d526e0c378d6fa77145e19ba8489b2b812a2572',
+      projectKey: '<YOUR_PROJECT_KEY>',
+      projectSecret: '<YOUR_PROJECT_SECRET>',
       baseUrl: 'http://192.168.1.13:8000',
       batchSize: 2,
       batchIntervalMs: 3000,
@@ -53,8 +63,11 @@ class _MyAppState extends State<MyApp> {
         // Firebase Integration (uncomment when Firebase is configured)
         // const FirebaseIntegration(),
 
+        // Amplitude Integration
+        amplitudeIntegration,
+
         // Mixpanel Integration (replace with your actual token)
-        const MixpanelIntegration(token: 'cb927e5b08c08e5ae725bb1d9e0bb432'),
+        const MixpanelIntegration(token: '<YOUR_MIXPANEL_TOKEN>'),
 
         IForeventsAPIIntegration(config: config),
       ],
@@ -100,6 +113,10 @@ class _MyAppState extends State<MyApp> {
         '/profile': (context) => ProfileScreen(iforevents: iforevents),
         '/settings': (context) => SettingsScreen(iforevents: iforevents),
         '/analytics': (context) => AnalyticsDemoScreen(iforevents: iforevents),
+        '/amplitude': (context) => AmplitudeDemoScreen(
+          iforevents: iforevents,
+          amplitudeIntegration: amplitudeIntegration,
+        ),
         '/iforevents': (context) => IForeventsAPIExamplePage(),
         '/iforevents/2': (context) => IForeventsExample(),
       },

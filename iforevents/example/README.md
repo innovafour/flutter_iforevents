@@ -18,6 +18,7 @@ This example app demonstrates the comprehensive features of the IforEvents analy
 - **Form Interactions**: Profile updates and form field changes
 
 ### 🔗 Integration Examples
+- **Amplitude**: Revenue tracking, group analytics, user journeys, A/B testing ⭐ NEW
 - **Firebase Analytics**: (Commented out - requires Firebase setup)
 - **Mixpanel**: User identification, event tracking, user properties
 - **Device Data**: Automatic IP detection and device information collection
@@ -48,6 +49,10 @@ This example app demonstrates the comprehensive features of the IforEvents analy
    - Uncomment Firebase-related code in `main.dart`
    - Add your `google-services.json` (Android) and `GoogleService-Info.plist` (iOS)
 
+   #### For Amplitude:
+   - Get your API key from [Amplitude](https://amplitude.com)
+   - Replace `'YOUR_AMPLITUDE_API_KEY'` in `main.dart` with your actual API key
+   
    #### For Mixpanel:
    - Get your project token from [Mixpanel](https://mixpanel.com)
    - Replace `'YOUR_MIXPANEL_TOKEN_HERE'` in `main.dart` with your actual token
@@ -81,6 +86,15 @@ This example app demonstrates the comprehensive features of the IforEvents analy
    - Different event types (basic, e-commerce, engagement)
    - Real-time event statistics
    - Recent events display
+
+5. **Amplitude Demo Screen** (`screens/amplitude_demo_screen.dart`) ⭐ NEW
+   - Basic events and properties
+   - User identification and properties
+   - Revenue tracking (purchases, subscriptions, IAPs)
+   - Group analytics (B2B features)
+   - Advanced features (user journeys, A/B testing)
+   - Real-time statistics with revenue tracking
+   - Professional UI with Amplitude branding
 
 ### Key Components
 
@@ -133,19 +147,37 @@ MaterialApp(
 
 ## Testing Analytics Integration
 
-### 1. Mixpanel Testing
+### 1. Amplitude Testing
+1. Get your API key from Amplitude dashboard
+2. Replace the API key in `main.dart`
+3. Run the app and navigate to "Amplitude Demo"
+4. Try different event types and features
+5. Check your Amplitude dashboard for:
+   - Events and properties
+   - User properties
+   - Revenue data
+   - Group analytics
+6. Features to test:
+   - Basic event tracking
+   - User identification
+   - Revenue tracking (purchases, subscriptions)
+   - Group analytics (company, team)
+   - User journey tracking
+   - A/B testing events
+
+### 2. Mixpanel Testing
 1. Replace the token in `main.dart`
 2. Run the app
 3. Navigate through screens and trigger events
 4. Check your Mixpanel dashboard for events
 
-### 2. Firebase Analytics Testing
+### 3. Firebase Analytics Testing
 1. Set up Firebase project
 2. Uncomment Firebase code in `main.dart`
 3. Run the app
 4. Check Firebase Analytics dashboard
 
-### 3. Debug Mode
+### 4. Debug Mode
 Events are logged to the console in debug mode. Check the output for:
 - Event names and properties
 - User identification data
