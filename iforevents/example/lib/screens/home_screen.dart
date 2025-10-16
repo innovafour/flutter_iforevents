@@ -76,6 +76,15 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Colors.purple,
             ),
             SizedBox(height: 12),
+            _NavigationButton(
+              iforevents: widget.iforevents,
+              context: context,
+              title: 'Amplitude Demo',
+              route: '/amplitude',
+              icon: Icons.trending_up,
+              color: Color(0xFF2B2D42),
+            ),
+            SizedBox(height: 12),
             _ActionButton(
               title: 'IForevents API',
               icon: Icons.event,

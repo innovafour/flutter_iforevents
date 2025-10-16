@@ -75,7 +75,7 @@ A comprehensive Flutter package for event tracking and analytics integration. IF
 
 ## Features
 
-- 📊 **Multi-platform Analytics**: Support for Iforevents API, Firebase, Mixpanel, Algolia, Meta, and CleverTap.
+- 📊 **Multi-platform Analytics**: Support for Iforevents API, Firebase, Mixpanel, Amplitude, Algolia, Meta, and CleverTap.
 - 📱 **Cross-platform**: Works on Android, iOS, Windows, macOS, Linux, and Web.
 - 🔍 **Automatic Device Detection**: Collects device information automatically.
 - 🌐 **IP Detection**: Automatic IP address detection.
@@ -116,6 +116,7 @@ A comprehensive Flutter package for event tracking and analytics integration. IF
 | **Iforevents API** | `iforevents` | Native integration with the Iforevents backend | ❌ No | All |
 | **Firebase Analytics** | `iforevents_firebase` | Google Firebase Analytics integration | ✅ Yes | Android, iOS, Web |
 | **Mixpanel** | `iforevents_mixpanel` | Mixpanel analytics integration | ❌ No | All |
+| **Amplitude** | `iforevents_amplitude` | Amplitude product analytics integration | ❌ No | All |
 | **Algolia** | `iforevents_algolia` | Algolia search analytics integration | ❌ No | All |
 | **Meta (Facebook)** | `iforevents_meta` | Facebook Pixel integration | ✅ Yes | Android, iOS, Web |
 | **CleverTap** | `iforevents_clevertap` | CleverTap analytics and engagement integration | ✅ Yes | Android, iOS |
@@ -135,6 +136,7 @@ dependencies:
   # Add the integrations you need
   iforevents_firebase: ^0.0.3
   iforevents_mixpanel: ^0.0.3
+  iforevents_amplitude: ^0.0.1
   iforevents_algolia: ^0.0.3
   iforevents_meta: ^0.0.3
   iforevents_clevertap: ^0.0.3
@@ -574,6 +576,30 @@ For detailed configuration options (batching, timeouts, retries), see the `IFore
       const MixpanelIntegration(key: 'YOUR_MIXPANEL_PROJECT_TOKEN'),
     ]);
     ```
+
+### Amplitude
+
+1.  Get your Amplitude API key from [amplitude.com](https://amplitude.com).
+2.  Add the `iforevents_amplitude` package to your `pubspec.yaml`.
+3.  Initialize with your API key:
+
+    ```dart
+    import 'package:iforevents_amplitude/iforevents_amplitude.dart';
+
+    await iforevents.init(integrations: [
+      const AmplitudeIntegration(apiKey: 'YOUR_AMPLITUDE_API_KEY'),
+    ]);
+    ```
+
+**Features:**
+- ✅ **Product analytics** with behavioral cohorts
+- ✅ **Event tracking** with custom properties
+- ✅ **User identification** with the Identify API
+- ✅ **Revenue tracking** with the Revenue API
+- ✅ **Group analytics** for B2B applications
+- ✅ **Session tracking** and funnel analysis
+- ✅ **EU data residency** support
+- ✅ **Configurable batching** for performance optimization
 
 ### Algolia
 
