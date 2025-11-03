@@ -7,7 +7,7 @@ A comprehensive Flutter package for event tracking and analytics integration. IF
 
 ## Features
 
-- 📊 **Multi-platform Analytics**: Support for Firebase Analytics, Mixpanel, Algolia, CleverTap, and Meta
+- 📊 **Multi-platform Analytics**: Support for Firebase Analytics, Mixpanel, Algolia, CleverTap, Meta, and Amplitude
 - 📱 **Cross-platform**: Works on Android, iOS, and Windows
 - 🔍 **Automatic Device Detection**: Collects device information automatically
 - 🌐 **IP Detection**: Automatic IP address detection
@@ -20,12 +20,13 @@ A comprehensive Flutter package for event tracking and analytics integration. IF
 
 | Integration | Package | Description | Native Config Required |
 |-------------|---------|-------------|------------------------|
-| IForevents API | `iforevents` | Native integration with the IForevents backend | ❌ No |
-| Firebase Analytics | `iforevents_firebase` | Google Firebase Analytics integration | ✅ Yes |
-| Mixpanel | `iforevents_mixpanel` | Mixpanel analytics integration | ❌ No |
-| Algolia Insights | `iforevents_algolia` | Algolia search analytics integration | ❌ No |
-| CleverTap | `iforevents_clevertap` | CleverTap engagement platform integration | ✅ Yes |
-| Meta (Facebook) | `iforevents_meta` | Facebook App Events integration | ✅ Yes |
+| IForevents API | [`iforevents`](https://pub.dev/packages/iforevents) | Native integration with the IForevents backend | ❌ No |
+| Firebase Analytics | [`iforevents_firebase`](https://pub.dev/packages/iforevents_firebase) | Google Firebase Analytics integration | ✅ Yes |
+| Mixpanel | [`iforevents_mixpanel`](https://pub.dev/packages/iforevents_mixpanel) | Mixpanel analytics integration | ❌ No |
+| Algolia Insights | [`iforevents_algolia`](https://pub.dev/packages/iforevents_algolia) | Algolia search analytics integration | ❌ No |
+| CleverTap | [`iforevents_clevertap`](https://pub.dev/packages/iforevents_clevertap) | CleverTap engagement platform integration | ✅ Yes |
+| Meta (Facebook) | [`iforevents_meta`](https://pub.dev/packages/iforevents_meta) | Facebook App Events integration | ✅ Yes |
+| Amplitude | [`iforevents_amplitude`](https://pub.dev/packages/iforevents_amplitude) | Amplitude analytics and product intelligence | ❌ No |
 
 ## Installation
 
@@ -40,6 +41,7 @@ dependencies:
   iforevents_algolia: ^0.0.3     # For Algolia Insights
   iforevents_clevertap: ^0.0.3   # For CleverTap
   iforevents_meta: ^0.0.3        # For Meta/Facebook
+  iforevents_amplitude: ^0.0.3   # For Amplitude
 ```
 
 Then run:
@@ -56,6 +58,7 @@ flutter pub get
 import 'package:iforevents/iforevents.dart';
 import 'package:iforevents_firebase/iforevents_firebase.dart';
 import 'package:iforevents_mixpanel/iforevents_mixpanel.dart';
+import 'package:iforevents_amplitude/iforevents_amplitude.dart';
 ```
 
 ### 2. Initialize with your integrations
@@ -66,6 +69,7 @@ final iforevents = Iforevents();
 await iforevents.init(integrations: [
   const FirebaseIntegration(),
   const MixpanelIntegration(token: 'YOUR_MIXPANEL_TOKEN'),
+  const AmplitudeIntegration(apiKey: 'YOUR_AMPLITUDE_API_KEY'),
 ]);
 ```
 
@@ -108,12 +112,14 @@ Initialize IforEvents with the analytics integrations you want to use:
 import 'package:iforevents/iforevents.dart';
 import 'package:iforevents_firebase/iforevents_firebase.dart';
 import 'package:iforevents_mixpanel/iforevents_mixpanel.dart';
+import 'package:iforevents_amplitude/iforevents_amplitude.dart';
 
 final iforevents = Iforevents();
 
 await iforevents.init(integrations: [
   const FirebaseIntegration(),
   const MixpanelIntegration(token: 'your_mixpanel_project_token'),
+  const AmplitudeIntegration(apiKey: 'your_amplitude_api_key'),
 ]);
 ```
 
@@ -605,6 +611,7 @@ For detailed setup instructions for each integration, see their respective READM
 - [Algolia Integration](https://pub.dev/packages/iforevents_algolia) - No native configuration required
 - [CleverTap Integration](https://pub.dev/packages/iforevents_clevertap) - Requires native configuration
 - [Meta Integration](https://pub.dev/packages/iforevents_meta) - Requires native configuration
+- [Amplitude Integration](https://pub.dev/packages/iforevents_amplitude) - No native configuration required
 
 ## Example
 
