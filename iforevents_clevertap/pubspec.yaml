@@ -22,7 +22,7 @@ dependencies:
   flutter:
     sdk: flutter
   clevertap_plugin: ^3.5.0
-  iforevents: ^0.0.3
+  iforevents: ^0.0.5
 
 dev_dependencies:
   flutter_test:

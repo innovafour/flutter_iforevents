@@ -34,7 +34,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  iforevents: ^0.0.3
+  iforevents: ^0.0.5
   # Add the integrations you need
   iforevents_firebase: ^0.0.3    # For Firebase Analytics
   iforevents_mixpanel: ^0.0.3    # For Mixpanel

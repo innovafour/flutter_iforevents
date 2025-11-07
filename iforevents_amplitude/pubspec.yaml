@@ -22,7 +22,7 @@ dependencies:
   flutter:
     sdk: flutter
   amplitude_flutter: ^4.2.0
-  iforevents: ^0.0.3
+  iforevents: ^0.0.5
 
 dev_dependencies:
   flutter_test:

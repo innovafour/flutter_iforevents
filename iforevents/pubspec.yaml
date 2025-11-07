@@ -1,6 +1,6 @@
 name: iforevents
 description: "A comprehensive Flutter package for event tracking and analytics integration with support for multiple platforms including Firebase, Mixpanel, and Algolia."
-version: 0.0.3
+version: 0.0.5
 homepage: https://github.com/innovafour/flutter_iforevents
 repository: https://github.com/innovafour/flutter_iforevents
 issue_tracker: https://github.com/innovafour/flutter_iforevents/issues
@@ -30,6 +30,7 @@ dependencies:
   get_storage: ^2.1.1
   path_provider: ^2.1.4
   uuid: ^4.5.1
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:
