@@ -22,7 +22,7 @@ dependencies:
   flutter:
     sdk: flutter
   mixpanel_flutter: ^2.4.4
-  iforevents: ^0.0.4
+  iforevents: ^0.0.5
 
 dev_dependencies:
   flutter_test:

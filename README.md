@@ -131,7 +131,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  iforevents: ^0.0.4
+  iforevents: ^0.0.5
   # Add the integrations you need
   iforevents_firebase: ^0.0.3
   iforevents_mixpanel: ^0.0.3
@@ -1480,8 +1480,8 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 1. Update version numbers in all `pubspec.yaml` files
 2. Update `CHANGELOG.md` with release notes
-3. Create a new tag: `git tag v0.0.4`
-4. Push tag: `git push origin v0.0.4`
+3. Create a new tag: `git tag v0.0.5`
+4. Push tag: `git push origin v0.0.5`
 5. Publish to pub.dev: `flutter packages pub publish`
 
 ## License
