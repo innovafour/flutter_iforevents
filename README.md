@@ -2,7 +2,6 @@
 
 [![pub package](https://img.shields.io/pub/v/iforevents.svg)](https://pub.dev/packages/iforevents)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Dart CI](https://github.com/innovafour/flutter_iforevents/actions/workflows/dart.yml/badge.svg)](https://github.com/innovafour/flutter_iforevents/actions/workflows/dart.yml)
 [![codecov](https://codecov.io/gh/innovafour/flutter_iforevents/branch/main/graph/badge.svg)](https://codecov.io/gh/innovafour/flutter_iforevents)
 [![style: very good analysis](https://img.shields.io/badge/style-very_good_analysis-B22C89.svg)](https://pub.dev/packages/very_good_analysis)
 
@@ -132,7 +131,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  iforevents: ^0.0.3
+  iforevents: ^0.0.4
   # Add the integrations you need
   iforevents_firebase: ^0.0.3
   iforevents_mixpanel: ^0.0.3

@@ -26,7 +26,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  iforevents: ^0.0.3
+  iforevents: ^0.0.4
   iforevents_amplitude: ^0.0.1
 ```
 

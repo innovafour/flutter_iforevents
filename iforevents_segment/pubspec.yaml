@@ -1,14 +1,14 @@
-name: iforevents_clevertap
-description: "CleverTap customer engagement integration for IForEvents - Advanced user analytics, segmentation, and personalized messaging."
-version: 0.0.3
+name: iforevents_segment
+description: "Segment analytics integration for IForEvents - Customer data platform for unified data collection and routing."
+version: 0.0.1
 homepage: https://github.com/innovafour/flutter_iforevents
 repository: https://github.com/innovafour/flutter_iforevents
 issue_tracker: https://github.com/innovafour/flutter_iforevents/issues
-documentation: https://pub.dev/documentation/iforevents_clevertap/latest/
+documentation: https://pub.dev/documentation/iforevents_segment/latest/
 
 environment:
   sdk: ^3.8.1
-  flutter: ">=1.17.0"
+  flutter: ">=3.3.0"
 
 platforms:
   android:
@@ -21,7 +21,7 @@ platforms:
 dependencies:
   flutter:
     sdk: flutter
-  clevertap_plugin: ^3.5.0
+  segment_analytics: ^1.1.10
   iforevents: ^0.0.4
 
 dev_dependencies:
