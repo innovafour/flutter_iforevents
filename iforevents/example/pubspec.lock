@@ -270,7 +270,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.0.3"
+    version: "0.0.5"
   iforevents_amplitude:
     dependency: "direct main"
     description:

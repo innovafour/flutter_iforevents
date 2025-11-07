@@ -1,3 +1,25 @@
+## 0.0.5
+
+**Amplitude Integration** 📊
+
+### ✨ New Features
+
+* **Amplitude Analytics**: Added official Amplitude analytics integration support
+* **New Package**: Introduced `iforevents_amplitude` package for Amplitude integration
+* **Unified API**: Consistent event tracking interface across all analytics platforms
+
+### 🔧 Technical Improvements
+
+* Enhanced integration factory to support Amplitude
+* Added comprehensive Amplitude documentation and examples
+* Improved modular architecture for third-party integrations
+
+### 📦 New Packages
+
+* `iforevents_amplitude`: Official Amplitude analytics integration
+
+---
+
 ## 0.0.3
 
 **Multi-Platform Support** 🌐
