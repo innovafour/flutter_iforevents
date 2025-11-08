@@ -41,7 +41,7 @@ dependencies:
   iforevents_algolia: ^0.0.3     # For Algolia Insights
   iforevents_clevertap: ^0.0.3   # For CleverTap
   iforevents_meta: ^0.0.3        # For Meta/Facebook
-  iforevents_amplitude: ^0.0.3   # For Amplitude
+  iforevents_amplitude: ^0.0.1   # For Amplitude
 ```
 
 Then run:
