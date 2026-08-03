@@ -23,8 +23,8 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  iforevents: ^0.0.5
-  iforevents_algolia: ^0.0.3
+  iforevents: ^0.1.0
+  iforevents_algolia: ^0.1.0
 ```
 
 Then run:

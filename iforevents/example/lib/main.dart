@@ -50,8 +50,6 @@ class _MyAppState extends State<MyApp> {
   Future<void> _initializeAnalytics() async {
     final config = IForeventsAPIConfig(
       projectKey: '<YOUR_PROJECT_KEY>',
-      projectSecret: '<YOUR_PROJECT_SECRET>',
-      baseUrl: 'http://192.168.1.13:8000',
       batchSize: 2,
       batchIntervalMs: 3000,
       enableLogging: true,

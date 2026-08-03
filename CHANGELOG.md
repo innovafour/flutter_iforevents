@@ -5,9 +5,55 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0]
+
+All eight packages are released together at 0.1.0. The integration packages
+previously pinned `iforevents: ^0.0.5`, which cannot resolve against this core —
+they would have silently kept users on the old core and its credential model.
+
+### Fixed
+- **Events from identified users were recorded as anonymous.** The SDK sent the
+  user id in `X-User-UUID`; the API reads `X-Custom-UUID`. On web the header was
+  also absent from the CORS allowlist, so preflight failed and ingestion stopped
+  entirely.
+- **`identify` discarded the uuid the server returned**, writing it to storage
+  but never to the in-memory field, so attribution only began after a restart.
+- **Single-event tracking omitted `event_type`**, so with `batchSize: 1` the
+  server filed every page view as an ordinary event.
+- **CleverTap mutated the shared event map**, deleting `products` for every
+  integration that ran after it, and threw when `products` was absent.
+- **Meta crashed on a non-double `total_amount`** in `Order Completed`.
+- **Page views never reached Firebase, Mixpanel, Meta, CleverTap or Amplitude.**
+  None overrode `pageView`, and five did not accept `onPageView` at all.
+- **Mixpanel stalled every `identify` for one second** on a `Future.delayed`.
+- **`identify` propagated platform-plugin failures into the host app.**
+
+### Removed (breaking)
+- **`IForeventsAPIConfig.projectSecret` is gone.** The SDK no longer sends
+  `X-Project-Secret`. A credential compiled into a mobile binary can be
+  extracted with `strings`, so it was never actually secret, and the API now
+  treats the project key as a public write-only credential. Reading analytics
+  requires a dashboard session.
+
+  Migration: delete the `projectSecret:` argument from your
+  `IForeventsAPIConfig`. Nothing else changes. Rotate any project secret that
+  shipped inside a released build.
+
+### Changed (breaking)
+- The public IP lookup is now **opt in**. Previously every session called
+  `api.ipify.org`, disclosing the user's address to a third party. Set
+  `collectPublicIP: true` to restore the old behaviour. The API records the
+  request's source IP server-side either way.
+- `iforevents_amplitude` replaces `defaultTracking` with `autocapture`, matching
+  the upstream deprecation. The default is behaviourally identical.
 
 ### Added
+- Pub workspace, so integration packages build against the core in this repo.
+- CI analyzes, format-checks and dry-run-publishes all eight packages, and fails
+  if an integration pins a stale core.
+- `iforevents_segment` is published for the first time.
+- `test/` suite covering the retry backoff, the pending-event queue round trip,
+  the configuration object, and the bytes the API integration puts on the wire.
 - Initial open-source release preparation
 - Comprehensive documentation and examples
 

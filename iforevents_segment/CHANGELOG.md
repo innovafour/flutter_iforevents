@@ -1,3 +1,16 @@
+## 0.1.0
+
+### 💥 Breaking
+
+* **Requires `iforevents` ^0.1.0.** The previous `^0.0.5` constraint could not
+  resolve against the current core, so this package silently held users back on
+  the old core that still carried a project secret. Upgrade both together.
+
+### 📦 Release
+
+* First publication to pub.dev. The package existed in the repository but was
+  never released, so `iforevents_segment` could not be depended on.
+
 # Changelog
 
 All notable changes to this project will be documented in this file.

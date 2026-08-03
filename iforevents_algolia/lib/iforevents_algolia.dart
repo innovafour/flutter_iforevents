@@ -9,6 +9,9 @@ class AlgoliaIntegration extends Integration<Insights> {
     super.onIdentify,
     super.onTrack,
     super.onReset,
+    // Algolia Insights has no screen-view concept, so there is nothing to
+    // forward to Algolia — but the callback still has to reach the caller.
+    super.onPageView,
   });
 
   final String applicationID;

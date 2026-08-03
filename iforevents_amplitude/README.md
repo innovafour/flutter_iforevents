@@ -26,8 +26,8 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  iforevents: ^0.0.5
-  iforevents_amplitude: ^0.0.1
+  iforevents: ^0.1.0
+  iforevents_amplitude: ^0.1.0
 ```
 
 Then run:
@@ -142,7 +142,7 @@ await iforevents.init(integrations: [
     flushIntervalMillis: 30000,
     optOut: false,
     minIdLength: 5,
-    defaultTracking: DefaultTrackingOptions(),
+    autocapture: AutocaptureOptions(),
     useBatch: false,
     serverZone: ServerZone.us,
   ),
@@ -158,7 +158,7 @@ await iforevents.init(integrations: [
 | `flushIntervalMillis` | int | 30000 | Time in milliseconds between event uploads |
 | `optOut` | bool | false | Opt the user out of tracking |
 | `minIdLength` | int? | null | Minimum length for user ID or device ID |
-| `defaultTracking` | DefaultTrackingOptions | DefaultTrackingOptions() | Default event tracking configuration |
+| `autocapture` | Autocapture | AutocaptureOptions() | Autocapture configuration (sessions, app lifecycles, deep links) |
 | `useBatch` | bool | false | Use batch API endpoint |
 | `serverZone` | ServerZone | ServerZone.us | Server zone (US or EU) |
 
@@ -335,7 +335,7 @@ import 'package:amplitude_flutter/default_tracking.dart';
 
 const AmplitudeIntegration(
   apiKey: 'YOUR_API_KEY',
-  defaultTracking: DefaultTrackingOptions(
+  autocapture: AutocaptureOptions(
     sessions: true,
     appLifecycles: false,
     deepLinks: false,

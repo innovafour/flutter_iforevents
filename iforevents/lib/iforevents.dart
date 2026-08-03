@@ -72,35 +72,43 @@ class Iforevents {
       return;
     }
 
-    final device = await deviceData;
+    try {
+      final device = await deviceData;
 
-    final data = {
-      'ip': await ip,
-      'device_ip': device.ip,
-      'device_brand': device.brand,
-      'device_model': device.model,
-      'device_os_version': device.osVersion,
-      'device_app_version': device.appVersion,
-      'device_platform': device.platform,
-      ...event.properties,
-    };
+      final data = {
+        'ip': await ip,
+        'device_ip': device.ip,
+        'device_brand': device.brand,
+        'device_model': device.model,
+        'device_os_version': device.osVersion,
+        'device_app_version': device.appVersion,
+        'device_platform': device.platform,
+        ...event.properties,
+      };
 
-    final results = await IntegrationFactory.identify(
-      customID: event.customID,
-      identifyData: data,
-    );
+      final results = await IntegrationFactory.identify(
+        customID: event.customID,
+        identifyData: data,
+      );
 
-    // Process results and handle failures
-    await _handleIntegrationResults(
-      results,
-      PendingEvent.fromIdentifyEvent(
-        event.copyWith(properties: data),
-        'base_event', // Will be updated with the real integration name in _handleIntegrationResults
-        retryIntervalSeconds: retryIntervals[0],
-      ),
-    );
+      // Process results and handle failures
+      await _handleIntegrationResults(
+        results,
+        PendingEvent.fromIdentifyEvent(
+          event.copyWith(properties: data),
+          'base_event', // Will be updated with the real integration name in _handleIntegrationResults
+          retryIntervalSeconds: retryIntervals[0],
+        ),
+      );
 
-    _identifyData = data;
+      _identifyData = data;
+    } catch (e) {
+      // Device probing goes through platform plugins; a missing one must not
+      // take down the host app's login flow. track/reset/pageViewed already
+      // swallow the same way.
+      log('Error in identify: $e');
+      return;
+    }
   }
 
   Future<void> track({required TrackEvent event}) async {
@@ -177,7 +185,14 @@ class Iforevents {
     }
   }
 
+  /// Opt-in flag for the third-party public IP lookup. Off by default: the
+  /// API already records the source IP of every request, so calling out to an
+  /// unrelated host only discloses the user's address for no benefit.
+  static bool collectPublicIP = false;
+
   static Future<String> get ip async {
+    if (!collectPublicIP) return '';
+
     try {
       final ipv4 = await Ipify.ipv4();
 

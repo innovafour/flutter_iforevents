@@ -1,1 +1,7 @@
 .DS_Store
+
+# Pub workspace root. Resolution happens once here rather than per package, so
+# the lockfile and the package config live at the root too. Libraries do not
+# check in a lockfile: https://dart.dev/guides/libraries/private-files
+/pubspec.lock
+.dart_tool/

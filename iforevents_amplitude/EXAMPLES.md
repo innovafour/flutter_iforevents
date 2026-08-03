@@ -44,7 +44,7 @@ const AmplitudeIntegration(
   flushQueueSize: 50,
   flushIntervalMillis: 30000,
   optOut: false,
-  defaultTracking: DefaultTrackingOptions(
+  autocapture: AutocaptureOptions(
     sessions: true,
     appLifecycles: false,
     deepLinks: false,
@@ -152,7 +152,7 @@ class _MyAppState extends State<MyApp> {
         apiKey: 'YOUR_AMPLITUDE_API_KEY',
         flushQueueSize: 30,
         flushIntervalMillis: 30000,
-        defaultTracking: DefaultTrackingOptions(
+        autocapture: AutocaptureOptions(
           sessions: true,
           appLifecycles: true,
         ),

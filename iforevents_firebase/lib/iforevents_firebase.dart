@@ -7,6 +7,7 @@ class FirebaseIntegration extends Integration {
     super.onIdentify,
     super.onTrack,
     super.onReset,
+    super.onPageView,
   });
 
   static final firebaseAnalytics = FirebaseAnalytics.instance;
@@ -50,6 +51,16 @@ class FirebaseIntegration extends Integration {
     await firebaseAnalytics.logEvent(
       name: event.eventName,
       parameters: eventProperties,
+    );
+  }
+
+  @override
+  Future<void> pageView({required PageViewEvent event}) async {
+    super.pageView(event: event);
+
+    await firebaseAnalytics.logScreenView(
+      screenName: event.toRoute?.name,
+      screenClass: event.previousRoute?.name,
     );
   }
 

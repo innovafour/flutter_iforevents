@@ -1,10 +1,12 @@
 name: iforevents_segment
 description: "Segment analytics integration for IForEvents - Customer data platform for unified data collection and routing."
-version: 0.0.1
+version: 0.1.0
 homepage: https://github.com/innovafour/flutter_iforevents
 repository: https://github.com/innovafour/flutter_iforevents
 issue_tracker: https://github.com/innovafour/flutter_iforevents/issues
 documentation: https://pub.dev/documentation/iforevents_segment/latest/
+
+resolution: workspace
 
 environment:
   sdk: ^3.8.1
@@ -22,7 +24,7 @@ dependencies:
   flutter:
     sdk: flutter
   segment_analytics: ^1.1.10
-  iforevents: ^0.0.5
+  iforevents: ^0.1.0
 
 dev_dependencies:
   flutter_test:

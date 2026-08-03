@@ -1,3 +1,16 @@
+## 0.1.0
+
+### 💥 Breaking
+
+* **Requires `iforevents` ^0.1.0.** The previous `^0.0.5` constraint could not
+  resolve against the current core, so this package silently held users back on
+  the old core that still carried a project secret. Upgrade both together.
+
+### ✨ Improvements
+
+* `onPageView` is accepted by the constructor and forwarded to the caller.
+  Algolia Insights has no screen-view concept, so nothing is sent to Algolia.
+
 ## 0.0.3
 
 **Multi-Platform Support** 🌐

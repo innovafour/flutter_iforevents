@@ -1,3 +1,22 @@
+## 0.1.0
+
+### 💥 Breaking
+
+* **Requires `iforevents` ^0.1.0.** The previous `^0.0.5` constraint could not
+  resolve against the current core, so this package silently held users back on
+  the old core that still carried a project secret. Upgrade both together.
+
+### 🐛 Fixes
+
+* **Stopped mutating the shared event map.** On `Order Completed` this package
+  called `removeWhere` directly on `event.properties` — the same map instance
+  handed to every other integration — so whichever integrations ran after
+  CleverTap lost the `products` key. It copies before stripping now.
+* **`Order Completed` no longer throws when `products` is missing or not a
+  list.** It falls back to recording an ordinary event.
+* **Screen views now reach CleverTap.** `pageView` was never overridden.
+* `onPageView` is accepted by the constructor and forwarded to the caller.
+
 ## 0.0.3
 
 **Multi-Platform Support** 🌐

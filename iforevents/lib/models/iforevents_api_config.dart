@@ -1,8 +1,14 @@
-/// Configuration class for IForevents API Integration
+/// Configuration for the IForevents API integration.
+///
+/// Only [projectKey] is needed. It is a public write key: it grants event
+/// ingestion and nothing else, so embedding it in a shipped app is safe.
+///
+/// There is deliberately no project secret here. A value compiled into a mobile
+/// binary can be extracted with `strings`, so it cannot be a secret. Reading
+/// analytics requires a dashboard session, never a credential held by a client.
 class IForeventsAPIConfig {
   const IForeventsAPIConfig({
     required this.projectKey,
-    required this.projectSecret,
     this.baseUrl = 'https://api.iforevents.com',
     this.batchSize = 10,
     this.batchIntervalMs = 5000,
@@ -15,54 +21,47 @@ class IForeventsAPIConfig {
     this.enableLogging = false,
     this.throwOnError = false,
     this.requeueFailedEvents = true,
+    this.collectPublicIP = false,
   });
 
-  /// Project API key (required)
+  /// Public project write key (required).
   final String projectKey;
 
-  /// Project API secret (required)
-  final String projectSecret;
-
-  /// Base URL for the IForevents API (default: https://api.iforevents.com)
+  /// Base URL of the IForevents API.
   final String baseUrl;
 
-  /// Number of events to batch before sending (default: 10)
-  /// Set to 1 to disable batching
+  /// Events to accumulate before sending. Set to 1 to disable batching.
   final int batchSize;
 
-  /// Interval in milliseconds to check for batch processing (default: 5000ms)
+  /// How often the batch timer fires, in milliseconds.
   final int batchIntervalMs;
 
-  /// Connection timeout in milliseconds (default: 10000ms)
   final int connectTimeoutMs;
-
-  /// Receive timeout in milliseconds (default: 10000ms)
   final int receiveTimeoutMs;
-
-  /// Send timeout in milliseconds (default: 10000ms)
   final int sendTimeoutMs;
 
-  /// Enable automatic retry on failure (default: true)
   final bool enableRetry;
-
-  /// Maximum number of retries (default: 3)
   final int maxRetries;
-
-  /// Delay between retries in milliseconds (default: 1000ms)
   final int retryDelayMs;
 
-  /// Enable debug logging (default: false)
   final bool enableLogging;
 
-  /// Throw exceptions on errors instead of just logging (default: false)
+  /// Throw instead of only logging when a request fails.
   final bool throwOnError;
 
-  /// Re-queue failed events for retry (default: true)
+  /// Re-queue events that failed to send.
   final bool requeueFailedEvents;
+
+  /// Resolve the device's public IP by calling a third-party service.
+  ///
+  /// Off by default: it sends the user's address to an unrelated host, which is
+  /// a disclosure most apps do not want and some privacy regimes do not permit.
+  /// The API already records the source IP of each request, so leaving this off
+  /// loses nothing.
+  final bool collectPublicIP;
 
   IForeventsAPIConfig copyWith({
     String? projectKey,
-    String? projectSecret,
     String? baseUrl,
     int? batchSize,
     int? batchIntervalMs,
@@ -75,10 +74,10 @@ class IForeventsAPIConfig {
     bool? enableLogging,
     bool? throwOnError,
     bool? requeueFailedEvents,
+    bool? collectPublicIP,
   }) {
     return IForeventsAPIConfig(
       projectKey: projectKey ?? this.projectKey,
-      projectSecret: projectSecret ?? this.projectSecret,
       baseUrl: baseUrl ?? this.baseUrl,
       batchSize: batchSize ?? this.batchSize,
       batchIntervalMs: batchIntervalMs ?? this.batchIntervalMs,
@@ -91,6 +90,7 @@ class IForeventsAPIConfig {
       enableLogging: enableLogging ?? this.enableLogging,
       throwOnError: throwOnError ?? this.throwOnError,
       requeueFailedEvents: requeueFailedEvents ?? this.requeueFailedEvents,
+      collectPublicIP: collectPublicIP ?? this.collectPublicIP,
     );
   }
 }

@@ -71,6 +71,8 @@ class IForeventsAPIIntegration extends Integration {
   int get queuedEventsCount => _eventQueue.length;
 
   void _setupDio() {
+    Iforevents.collectPublicIP = config.collectPublicIP;
+
     _dio.options.baseUrl = '${config.baseUrl}/v1';
     _dio.options.connectTimeout = Duration(
       milliseconds: config.connectTimeoutMs,
@@ -89,11 +91,10 @@ class IForeventsAPIIntegration extends Integration {
           options.headers.addAll({
             'Content-Type': 'application/json',
             'X-Project-Key': config.projectKey,
-            'X-Project-Secret': config.projectSecret,
           });
 
           if (_userUUID != null) {
-            options.headers['X-User-UUID'] = _userUUID;
+            options.headers['X-Custom-UUID'] = _userUUID;
           }
 
           if (config.enableLogging) {
@@ -219,6 +220,7 @@ class IForeventsAPIIntegration extends Integration {
           final userUUID = user['uuid'] as String?;
 
           if (userUUID != null) {
+            _userUUID = userUUID;
             await _storage.write(_userUUIDKey, userUUID);
 
             if (config.enableLogging) {
@@ -323,7 +325,6 @@ class IForeventsAPIIntegration extends Integration {
       }
 
       // Clear userUUID both in memory and storage
-      _userUUID = null;
       _userUUID = null;
       _isIdentified = false;
       await _storage.remove(_userUUIDKey);
@@ -460,6 +461,9 @@ class IForeventsAPIIntegration extends Integration {
         '/events/track',
         data: {
           'event_name': eventData.name,
+          // Without this the server defaults every event to "track" and page
+          // views become indistinguishable from ordinary events.
+          'event_type': eventData.type,
           'properties': eventData.properties,
         },
       );
