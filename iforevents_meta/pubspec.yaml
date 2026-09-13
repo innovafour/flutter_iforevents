@@ -1,6 +1,6 @@
 name: iforevents_meta
 description: "Meta (Facebook) Analytics integration for IForEvents - Comprehensive marketing analytics and user behavior tracking for Facebook ecosystem."
-version: 0.1.0
+version: 0.2.0
 homepage: https://github.com/innovafour/flutter_iforevents
 repository: https://github.com/innovafour/flutter_iforevents
 issue_tracker: https://github.com/innovafour/flutter_iforevents/issues
@@ -24,7 +24,7 @@ dependencies:
   flutter:
     sdk: flutter
   facebook_app_events: ^0.20.1
-  iforevents: ^0.1.0
+  iforevents: ^0.2.0
 
 dev_dependencies:
   flutter_test:

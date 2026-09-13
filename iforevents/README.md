@@ -34,14 +34,14 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  iforevents: ^0.1.0
+  iforevents: ^0.2.0
   # Add the integrations you need
-  iforevents_firebase: ^0.1.0    # For Firebase Analytics
-  iforevents_mixpanel: ^0.1.0    # For Mixpanel
-  iforevents_algolia: ^0.1.0     # For Algolia Insights
-  iforevents_clevertap: ^0.1.0   # For CleverTap
-  iforevents_meta: ^0.1.0        # For Meta/Facebook
-  iforevents_amplitude: ^0.1.0   # For Amplitude
+  iforevents_firebase: ^0.2.0    # For Firebase Analytics
+  iforevents_mixpanel: ^0.2.0    # For Mixpanel
+  iforevents_algolia: ^0.2.0     # For Algolia Insights
+  iforevents_clevertap: ^0.2.0   # For CleverTap
+  iforevents_meta: ^0.2.0        # For Meta/Facebook
+  iforevents_amplitude: ^0.2.0   # For Amplitude
 ```
 
 Then run:
@@ -613,6 +613,32 @@ For detailed setup instructions for each integration, see their respective READM
 - [Meta Integration](https://pub.dev/packages/iforevents_meta) - Requires native configuration
 - [Amplitude Integration](https://pub.dev/packages/iforevents_amplitude) - No native configuration required
 
+## Errors and quotas
+
+Failures the app can act on arrive as typed exceptions (all extend
+`IForeventsAPIException`, which carries `statusCode`, `details` and the API's
+stable `code`):
+
+| Exception | When | What the SDK does |
+|-----------|------|-------------------|
+| `IForeventsQuotaExceededException` | 429 `quota_exceeded`: the organization is past its monthly events and grace period | Drops the events, calls `onQuotaExceeded` once, sets `isQuotaExceeded` |
+| `IForeventsAuthException` | 401/403: the project key was rotated, or the project is disabled | Drops the events, no retry |
+| `IForeventsRateLimitedException` | 429 without a quota code | Retries after `Retry-After`, then re-queues |
+
+```dart
+final config = IForeventsAPIConfig(
+  projectKey: '<YOUR_PROJECT_KEY>',
+  onQuotaExceeded: (error) {
+    // Show an upgrade prompt; events are refused until the next month or a plan change.
+    debugPrint('quota: ${error.used}/${error.limit}');
+  },
+);
+```
+
+With `throwOnError: true` the same exceptions are thrown from `track`,
+`pageView` and `identify`; with the default `false` they are logged (when
+`enableLogging` is on) and swallowed.
+
 ## Example
 
 Check out the [example](./example) directory for a complete implementation showing:
@@ -659,3 +685,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 Made with ❤️ by [Innovafour](https://innovafour.com)
+

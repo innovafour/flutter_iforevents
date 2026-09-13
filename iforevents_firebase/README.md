@@ -22,8 +22,8 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  iforevents: ^0.1.0
-  iforevents_firebase: ^0.1.0
+  iforevents: ^0.2.0
+  iforevents_firebase: ^0.2.0
 ```
 
 Then run:

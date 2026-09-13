@@ -21,6 +21,7 @@ import 'utils/web_storage_stub.dart'
 
 export 'package:iforevents/integration/_integration.dart';
 export 'package:iforevents/integration/iforevents.dart';
+export 'package:iforevents/models/errors.dart';
 
 /// A class for managing mobile shared events.
 class Iforevents {
