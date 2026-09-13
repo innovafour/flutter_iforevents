@@ -242,16 +242,19 @@ class IForeventsAPIIntegration extends Integration {
         }
       }
     } catch (e) {
+      final error = _classify(e);
+      _noteOutcome(error);
+
       if (config.enableLogging) {
         developer.log(
           'Failed to identify user: ${event.customID}',
           name: 'IForeventsAPI',
-          error: e,
+          error: error,
         );
       }
 
       if (config.throwOnError) {
-        rethrow;
+        throw error;
       }
     }
   }
@@ -455,6 +458,82 @@ class IForeventsAPIIntegration extends Integration {
     }
   }
 
+  /// Set after a `quota_exceeded` answer; cleared by the next accepted request.
+  bool _quotaExceeded = false;
+
+  /// Whether the last ingest attempt was refused for an exhausted quota.
+  bool get isQuotaExceeded => _quotaExceeded;
+
+  /// Maps a transport error to the typed exceptions of [errors.dart].
+  IForeventsAPIException _classify(Object error) {
+    if (error is IForeventsAPIException) return error;
+    if (error is! DioException) {
+      return IForeventsAPIException(error.toString());
+    }
+    final response = error.response;
+    final status = response?.statusCode;
+    final data = response?.data;
+    final details = data is Map<String, dynamic> ? data : null;
+    final code = details?['error'];
+    final message =
+        (details?['message'] ?? code ?? error.message ?? 'request failed')
+            .toString();
+
+    if (status == 429 && code == 'quota_exceeded') {
+      return IForeventsQuotaExceededException(
+        message,
+        details: details,
+        limit: _asInt(details?['limit']),
+        used: _asInt(details?['used']),
+        organizationUuid: details?['org_uuid'] as String?,
+      );
+    }
+    if (status == 429) {
+      final header = response?.headers.value('retry-after');
+      final seconds = header == null ? null : int.tryParse(header);
+      return IForeventsRateLimitedException(
+        message,
+        details: details,
+        retryAfter: seconds == null ? null : Duration(seconds: seconds),
+      );
+    }
+    if (status == 401 || status == 403) {
+      return IForeventsAuthException(
+        message,
+        statusCode: status,
+        details: details,
+      );
+    }
+    return IForeventsAPIException(
+      message,
+      statusCode: status,
+      details: details,
+    );
+  }
+
+  static int? _asInt(Object? value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  /// Quota and credential failures are permanent for the events at hand.
+  bool _isPermanent(IForeventsAPIException error) =>
+      error is IForeventsQuotaExceededException ||
+      error is IForeventsAuthException;
+
+  void _noteOutcome(IForeventsAPIException? error) {
+    if (error is IForeventsQuotaExceededException) {
+      if (!_quotaExceeded) {
+        _quotaExceeded = true;
+        config.onQuotaExceeded?.call(error);
+      }
+    } else if (error == null) {
+      _quotaExceeded = false;
+    }
+  }
+
   Future<void> _sendSingleEvent(IForeventsQueuedEvent eventData) async {
     try {
       await _dio.post(
@@ -468,6 +547,8 @@ class IForeventsAPIIntegration extends Integration {
         },
       );
 
+      _noteOutcome(null);
+
       if (config.enableLogging) {
         developer.log(
           'Single event sent successfully: ${eventData.name}',
@@ -475,14 +556,17 @@ class IForeventsAPIIntegration extends Integration {
         );
       }
     } catch (e) {
+      final error = _classify(e);
+      _noteOutcome(error);
+
       if (config.enableLogging) {
         developer.log(
           'Failed to send single event: ${eventData.name}',
           name: 'IForeventsAPI',
-          error: e,
+          error: error,
         );
       }
-      rethrow;
+      throw error;
     }
   }
 
@@ -493,6 +577,7 @@ class IForeventsAPIIntegration extends Integration {
       final body = events.map((e) => e.toJson()).toList();
 
       await _dio.post('/events/batch', data: {'events': body});
+      _noteOutcome(null);
 
       if (config.enableLogging) {
         developer.log(
@@ -501,20 +586,25 @@ class IForeventsAPIIntegration extends Integration {
         );
       }
     } catch (e) {
+      final error = _classify(e);
+      _noteOutcome(error);
+
       if (config.enableLogging) {
         developer.log(
           'Failed to send batch of ${events.length} events',
           name: 'IForeventsAPI',
-          error: e,
+          error: error,
         );
       }
 
-      // Re-queue events if configured to do so
-      if (config.requeueFailedEvents) {
+      // Transient failures go back to the front of the queue; an exhausted
+      // quota or a refused key would fail the same way forever, so those
+      // events are dropped.
+      if (config.requeueFailedEvents && !_isPermanent(error)) {
         _eventQueue.insertAll(0, events);
       }
 
-      rethrow;
+      throw error;
     }
   }
 
@@ -575,16 +665,6 @@ class IForeventsQueueStatus {
   }
 }
 
-/// Exception class for IForevents API errors
-class IForeventsAPIException implements Exception {
-  const IForeventsAPIException(this.message);
-
-  final String message;
-
-  @override
-  String toString() => 'IForeventsAPIException: $message';
-}
-
 /// Internal retry interceptor for Dio
 class _IForeventsRetryInterceptor extends Interceptor {
   _IForeventsRetryInterceptor({
@@ -610,7 +690,7 @@ class _IForeventsRetryInterceptor extends Interceptor {
     if (retryCount < retries && _shouldRetry(err)) {
       extra['retry_count'] = retryCount + 1;
 
-      final delay = Duration(milliseconds: retryDelayMs * (retryCount + 1));
+      final delay = _delayFor(err, retryCount);
       await Future.delayed(delay);
 
       if (enableLogging) {
@@ -635,11 +715,29 @@ class _IForeventsRetryInterceptor extends Interceptor {
   bool _shouldRetry(DioException error) {
     final statusCode = error.response?.statusCode;
 
-    // Retry on network errors or 5xx server errors
+    // Retry on network errors, 5xx server errors and short rate limits. A
+    // quota_exceeded 429 is not a rate limit: it holds until the next month
+    // or a plan change, so retrying it is pointless.
     return error.type == DioExceptionType.connectionTimeout ||
         error.type == DioExceptionType.receiveTimeout ||
         error.type == DioExceptionType.sendTimeout ||
         error.type == DioExceptionType.connectionError ||
-        (statusCode != null && statusCode >= 500);
+        (statusCode != null && statusCode >= 500) ||
+        (statusCode == 429 && !_isQuotaExceeded(error));
+  }
+
+  static bool _isQuotaExceeded(DioException error) {
+    final data = error.response?.data;
+    return data is Map && data['error'] == 'quota_exceeded';
+  }
+
+  /// Server-suggested wait for a 429, else the linear backoff.
+  Duration _delayFor(DioException error, int attempt) {
+    final header = error.response?.headers.value('retry-after');
+    final seconds = header == null ? null : int.tryParse(header);
+    if (error.response?.statusCode == 429 && seconds != null && seconds > 0) {
+      return Duration(seconds: seconds);
+    }
+    return Duration(milliseconds: retryDelayMs * (attempt + 1));
   }
 }

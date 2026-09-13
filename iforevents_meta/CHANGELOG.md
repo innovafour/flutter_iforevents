@@ -1,3 +1,8 @@
+## 0.2.0
+
+* **Requires `iforevents` ^0.2.0.** Picks up the typed API errors and the
+  quota-aware queue of the core; no changes to this integration's own API.
+
 ## 0.1.0
 
 ### 💥 Breaking

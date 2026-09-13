@@ -1,3 +1,36 @@
+## 0.2.0
+
+### ✨ Added
+
+* **Typed API errors.** `IForeventsQuotaExceededException` (429
+  `quota_exceeded`, with `limit`, `used` and `organizationUuid`),
+  `IForeventsAuthException` (401/403, refused project key) and
+  `IForeventsRateLimitedException` (429 rate limit, with `retryAfter`) replace
+  the bare `IForeventsAPIException` for those answers. All extend
+  `IForeventsAPIException`, which now carries `statusCode`, `details` and the
+  API's stable `code`.
+* **`IForeventsAPIConfig.onQuotaExceeded`** is called once when the API starts
+  refusing events for an exhausted monthly quota, so the app can show an
+  upgrade prompt. `IForeventsAPIIntegration.isQuotaExceeded` reports the
+  current state; it clears on the next accepted request.
+* **`Retry-After` is honored.** A plain 429 rate limit is retried after the
+  server's suggested wait instead of the fixed backoff.
+
+### 🔧 Changed
+
+* **Quota and credential failures no longer re-queue events.** An exhausted
+  quota or a refused key fails the same way on every retry, so the affected
+  events are dropped (and logged) instead of piling up in the queue and
+  draining the battery. Transient failures (network, 5xx, rate limits) still
+  re-queue when `requeueFailedEvents` is true.
+* `identify` failures now surface the typed exceptions as well.
+
+### 📦 Release
+
+* The key-only credential model of 0.1.0 is unchanged: the SDK sends
+  `X-Project-Key` only and has no place for a project secret. Every
+  integration package is released as 0.2.0 and pins `iforevents: ^0.2.0`.
+
 ## 0.1.0
 
 ### 💥 Breaking

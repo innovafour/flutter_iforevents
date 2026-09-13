@@ -1,3 +1,5 @@
+import 'package:iforevents/models/errors.dart';
+
 /// Configuration for the IForevents API integration.
 ///
 /// Only [projectKey] is needed. It is a public write key: it grants event
@@ -22,6 +24,7 @@ class IForeventsAPIConfig {
     this.throwOnError = false,
     this.requeueFailedEvents = true,
     this.collectPublicIP = false,
+    this.onQuotaExceeded,
   });
 
   /// Public project write key (required).
@@ -51,6 +54,11 @@ class IForeventsAPIConfig {
 
   /// Re-queue events that failed to send.
   final bool requeueFailedEvents;
+
+  /// Called once when the API starts refusing events with `quota_exceeded`
+  /// (429), and again after a later success followed by a new refusal. Use
+  /// it to surface an upgrade prompt; the refused events are dropped.
+  final void Function(IForeventsQuotaExceededException error)? onQuotaExceeded;
 
   /// Resolve the device's public IP by calling a third-party service.
   ///

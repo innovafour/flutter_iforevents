@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-09-13
+
+### Added
+
+- Core: typed API errors (`IForeventsQuotaExceededException`,
+  `IForeventsAuthException`, `IForeventsRateLimitedException`),
+  `IForeventsAPIConfig.onQuotaExceeded`, `isQuotaExceeded`, `Retry-After`
+  support on rate limits.
+
+### Changed
+
+- Core: events refused for an exhausted quota or a bad key are dropped instead
+  of re-queued; transient failures still re-queue.
+- All seven integration packages released as 0.2.0 pinning `iforevents: ^0.2.0`.
+
 ## [0.1.0]
 
 All eight packages are released together at 0.1.0. The integration packages

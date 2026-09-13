@@ -138,14 +138,14 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  iforevents: ^0.1.0
+  iforevents: ^0.2.0
   # Add the integrations you need
-  iforevents_firebase: ^0.1.0
-  iforevents_mixpanel: ^0.1.0
-  iforevents_amplitude: ^0.1.0
-  iforevents_algolia: ^0.1.0
-  iforevents_meta: ^0.1.0
-  iforevents_clevertap: ^0.1.0
+  iforevents_firebase: ^0.2.0
+  iforevents_mixpanel: ^0.2.0
+  iforevents_amplitude: ^0.2.0
+  iforevents_algolia: ^0.2.0
+  iforevents_meta: ^0.2.0
+  iforevents_clevertap: ^0.2.0
 ```
 
 Then run:

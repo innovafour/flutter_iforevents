@@ -5,3 +5,6 @@
 # check in a lockfile: https://dart.dev/guides/libraries/private-files
 /pubspec.lock
 .dart_tool/
+
+# Flutter build output (test caches, unit test assets)
+build/
