@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:iforevents/iforevents.dart';
 import 'package:iforevents/models/iforevents_api_config.dart';
+import 'package:uuid/uuid.dart';
 
 /// IForevents API Integration for Flutter
 ///
@@ -50,16 +51,21 @@ class IForeventsAPIIntegration extends Integration {
   final Dio _dio;
   final GetStorage _storage = GetStorage();
 
-  static const String _userUUIDKey = 'iforevents_user_uuid';
+  static const String _userIdKey = 'iforevents_user_id';
+  static const String _identifiedKey = 'iforevents_user_identified';
 
-  String? _userUUID;
+  /// The id every request carries in `X-User-Id`: an anonymous id generated
+  /// on first launch (`anon_...`), or the `customID` of the last identify.
+  /// Without it the api would file events under a profile derived from the
+  /// device's address, merging every user behind one carrier or NAT.
+  String? _userId;
   final List<IForeventsQueuedEvent> _eventQueue = [];
   Timer? _batchTimer;
   bool _isInitialized = false;
   bool _isIdentified = false;
 
-  /// User UUID from the last identify call
-  String? get userUUID => _userUUID;
+  /// The id events are attributed to (anonymous until identify).
+  String? get userId => _userId;
 
   /// Whether the integration has been initialized
   bool get isInitialized => _isInitialized;
@@ -93,8 +99,8 @@ class IForeventsAPIIntegration extends Integration {
             'X-Project-Key': config.projectKey,
           });
 
-          if (_userUUID != null) {
-            options.headers['X-Custom-UUID'] = _userUUID;
+          if (_userId != null) {
+            options.headers['X-User-Id'] = _userId;
           }
 
           if (config.enableLogging) {
@@ -156,14 +162,24 @@ class IForeventsAPIIntegration extends Integration {
     try {
       super.init();
 
-      if (_userUUID == null) {
-        _userUUID = _storage.read(_userUUIDKey);
-        if (_userUUID != null) {
-          _isIdentified = true;
+      if (_userId == null) {
+        final stored = _storage.read<String>(_userIdKey);
+        if (stored != null && stored.isNotEmpty) {
+          _userId = stored;
+          _isIdentified = _storage.read<bool>(_identifiedKey) ?? false;
 
           if (config.enableLogging) {
             developer.log(
-              'Loaded saved userUUID: $_userUUID',
+              'Loaded saved user id: $_userId',
+              name: 'IForeventsAPI',
+            );
+          }
+        } else {
+          await _setUser(_anonymousId(), identified: false);
+
+          if (config.enableLogging) {
+            developer.log(
+              'Generated anonymous user id: $_userId',
               name: 'IForeventsAPI',
             );
           }
@@ -171,7 +187,7 @@ class IForeventsAPIIntegration extends Integration {
       } else {
         if (config.enableLogging) {
           developer.log(
-            'UserUUID already loaded in singleton: $_userUUID',
+            'User id already loaded in singleton: $_userId',
             name: 'IForeventsAPI',
           );
         }
@@ -208,38 +224,21 @@ class IForeventsAPIIntegration extends Integration {
     }
 
     try {
+      // Attribute from now on, even if the profile request itself fails:
+      // the api creates the profile on the first event it sees for this id.
+      if (event.customID.isNotEmpty) {
+        await _setUser(event.customID, identified: true);
+      }
+
       final requestData = _buildIdentifyRequest(event);
 
-      final response = await _dio.post('/events/identify', data: requestData);
+      await _dio.post('/events/identify', data: requestData);
 
-      if (response.data != null) {
-        final responseData = response.data as Map<String, dynamic>;
-        final user = responseData['user'] as Map<String, dynamic>?;
-
-        if (user != null) {
-          final userUUID = user['uuid'] as String?;
-
-          if (userUUID != null) {
-            _userUUID = userUUID;
-            await _storage.write(_userUUIDKey, userUUID);
-
-            if (config.enableLogging) {
-              developer.log(
-                'UserUUID updated and saved: $userUUID',
-                name: 'IForeventsAPI',
-              );
-            }
-          }
-
-          _isIdentified = true;
-
-          if (config.enableLogging) {
-            developer.log(
-              'User identified successfully. User: $userUUID',
-              name: 'IForeventsAPI',
-            );
-          }
-        }
+      if (config.enableLogging) {
+        developer.log(
+          'User identified successfully. User: $_userId',
+          name: 'IForeventsAPI',
+        );
       }
     } catch (e) {
       final error = _classify(e);
@@ -327,10 +326,8 @@ class IForeventsAPIIntegration extends Integration {
         _eventQueue.clear();
       }
 
-      // Clear userUUID both in memory and storage
-      _userUUID = null;
-      _isIdentified = false;
-      await _storage.remove(_userUUIDKey);
+      // Forget the person; the next events belong to a fresh anonymous id.
+      await _setUser(_anonymousId(), identified: false);
 
       if (config.enableLogging) {
         developer.log(
@@ -360,24 +357,38 @@ class IForeventsAPIIntegration extends Integration {
       batchSize: config.batchSize,
       isInitialized: _isInitialized,
       isIdentified: _isIdentified,
-      userUUID: _userUUID,
+      userId: _userId,
     );
   }
 
-  /// Get the userUUID stored in local storage (if any)
-  String? getStoredUserUUID() {
-    return _storage.read(_userUUIDKey);
+  /// Get the user id stored in local storage (if any)
+  String? getStoredUserId() {
+    return _storage.read<String>(_userIdKey);
   }
 
-  /// Clear the stored userUUID from local storage
-  Future<void> clearStoredUserUUID() async {
-    await _storage.remove(_userUUIDKey);
+  /// Clear the stored user id from local storage; the next init generates
+  /// a new anonymous one.
+  Future<void> clearStoredUserId() async {
+    await _storage.remove(_userIdKey);
+    await _storage.remove(_identifiedKey);
     if (config.enableLogging) {
       developer.log(
-        'Stored userUUID cleared from local storage',
+        'Stored user id cleared from local storage',
         name: 'IForeventsAPI',
       );
     }
+  }
+
+  Future<void> _setUser(String id, {required bool identified}) async {
+    _userId = id;
+    _isIdentified = identified;
+    await _storage.write(_userIdKey, id);
+    await _storage.write(_identifiedKey, identified);
+  }
+
+  /// A fresh anonymous id, unrelated to anything the server derives.
+  static String _anonymousId() {
+    return 'anon_${const Uuid().v4().replaceAll('-', '')}';
   }
 
   /// Reset the singleton instance completely
@@ -645,14 +656,16 @@ class IForeventsQueueStatus {
     required this.batchSize,
     required this.isInitialized,
     required this.isIdentified,
-    this.userUUID,
+    this.userId,
   });
 
   final int queuedEvents;
   final int batchSize;
   final bool isInitialized;
   final bool isIdentified;
-  final String? userUUID;
+
+  /// The id events are attributed to (`X-User-Id`).
+  final String? userId;
 
   Map<String, dynamic> toJson() {
     return {
@@ -660,7 +673,7 @@ class IForeventsQueueStatus {
       'batch_size': batchSize,
       'is_initialized': isInitialized,
       'is_identified': isIdentified,
-      'user_uuid': userUUID,
+      'user_id': userId,
     };
   }
 }

@@ -272,15 +272,15 @@ class _IForeventsExampleState extends State<IForeventsExample> {
                               label: 'Batch Size',
                               value: queueStatus!.batchSize,
                             ),
-                            if (queueStatus!.userUUID != null)
+                            if (queueStatus!.userId != null)
                               _StatusRow(
                                 label: 'User UUID',
-                                value: queueStatus!.userUUID!,
+                                value: queueStatus!.userId!,
                               ),
-                            if (queueStatus!.userUUID != null)
+                            if (queueStatus!.userId != null)
                               _StatusRow(
                                 label: 'User UUID',
-                                value: queueStatus!.userUUID!,
+                                value: queueStatus!.userId!,
                               ),
                           ] else
                             Text('Updating state...'),

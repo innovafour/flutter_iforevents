@@ -10,11 +10,12 @@ import 'package:iforevents/models/iforevents_api_config.dart';
 
 /// Captures what the SDK actually puts on the wire.
 ///
-/// These two details are worth a real socket rather than a mock: both were
-/// wrong at once, and both are invisible to a unit test that stops at the
-/// integration's public surface. The API reads the user id from
-/// `X-Custom-UUID` and rejects nothing when it is missing — it just files the
-/// event as anonymous — so a wrong header name fails silently in production.
+/// These details are worth a real socket rather than a mock: they were wrong
+/// at once, and they are invisible to a unit test that stops at the
+/// integration's public surface. The API reads the user id from `X-User-Id`
+/// and rejects nothing when it is missing — it files the event under an
+/// address-derived profile — so a wrong header name fails silently in
+/// production.
 class _CapturedRequest {
   _CapturedRequest({
     required this.headers,
@@ -70,7 +71,11 @@ void main() {
       captured.add(
         _CapturedRequest(
           headers: {
-            for (final name in const ['x-custom-uuid', 'x-project-key'])
+            for (final name in const [
+              'x-user-id',
+              'x-custom-uuid',
+              'x-project-key',
+            ])
               if (request.headers.value(name) != null)
                 name: request.headers.value(name)!,
           },
@@ -135,7 +140,26 @@ void main() {
     },
   );
 
-  test('track carries the identified user in X-Custom-UUID', () async {
+  test('anonymous tracks carry a generated, persisted X-User-Id', () async {
+    final integration = build();
+    await integration.init();
+
+    final anonymous = integration.userId;
+    expect(anonymous, isNotNull);
+    expect(anonymous, startsWith('anon_'));
+    expect(integration.isIdentified, isFalse);
+
+    await integration.track(event: const TrackEvent(eventName: 'app_open'));
+
+    final track = captured.firstWhere((r) => r.path.endsWith('/events/track'));
+    expect(track.headers['x-user-id'], anonymous);
+    expect(track.headers.containsKey('x-custom-uuid'), isFalse);
+
+    // The same id survives a restart: it is what keeps one device one user.
+    expect(integration.getStoredUserId(), anonymous);
+  });
+
+  test('track carries the identified user in X-User-Id', () async {
     final integration = build();
     await integration.init();
 
@@ -143,15 +167,38 @@ void main() {
       event: const IdentifyEvent(customID: 'abc', properties: {}),
     );
 
-    // The field, not just storage, has to pick the uuid up — otherwise
+    // The field, not just storage, has to pick the id up — otherwise
     // attribution only starts working after the next app launch.
-    expect(integration.userUUID, 'user-uuid-from-server');
+    expect(integration.userId, 'abc');
+    expect(integration.isIdentified, isTrue);
 
     await integration.track(event: const TrackEvent(eventName: 'checkout'));
 
+    final identify = captured.firstWhere(
+      (r) => r.path.endsWith('/events/identify'),
+    );
     final track = captured.firstWhere((r) => r.path.endsWith('/events/track'));
 
-    expect(track.headers['x-custom-uuid'], 'user-uuid-from-server');
+    expect(identify.body['custom_id'], 'abc');
+    expect(track.headers['x-user-id'], 'abc');
     expect(track.headers['x-project-key'], 'pk_test');
+  });
+
+  test('reset starts a new anonymous user', () async {
+    final integration = build();
+    await integration.init();
+
+    await integration.identify(
+      event: const IdentifyEvent(customID: 'abc', properties: {}),
+    );
+    await integration.reset();
+
+    expect(integration.isIdentified, isFalse);
+    expect(integration.userId, startsWith('anon_'));
+    expect(integration.userId, isNot('abc'));
+
+    await integration.track(event: const TrackEvent(eventName: 'after'));
+    final track = captured.lastWhere((r) => r.path.endsWith('/events/track'));
+    expect(track.headers['x-user-id'], integration.userId);
   });
 }

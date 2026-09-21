@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Core: every request carries `X-User-Id` (replaces `X-Custom-UUID`): a
+  generated, persisted anonymous id until `identify` sets `customID`, so
+  users behind one carrier or NAT stay distinct. Renames `userUUID` to
+  `userId` on the integration and `IForeventsQueueStatus`.
 - Core: events refused for an exhausted quota or a bad key are dropped instead
   of re-queued; transient failures still re-queue.
 - All seven integration packages released as 0.2.0 pinning `iforevents: ^0.2.0`.

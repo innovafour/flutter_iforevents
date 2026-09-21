@@ -18,6 +18,16 @@
 
 ### 🔧 Changed
 
+* **Every request names the user in `X-User-Id`** (replaces `X-Custom-UUID`;
+  requires an api that accepts it). On first launch the integration
+  generates an anonymous id (`anon_...`), persists it and sends it with every
+  event, so users behind one carrier, NAT or proxy no longer collapse into a
+  single address-derived profile; `identify` switches the id to `customID`,
+  `reset` starts a fresh anonymous one. `identify` no longer has to succeed
+  before events are attributed: the api creates the profile on first sight.
+  Renames: `userUUID` → `userId`, `getStoredUserUUID` → `getStoredUserId`,
+  `clearStoredUserUUID` → `clearStoredUserId`,
+  `IForeventsQueueStatus.userUUID` → `userId` (`user_id` in `toJson`).
 * **Quota and credential failures no longer re-queue events.** An exhausted
   quota or a refused key fails the same way on every retry, so the affected
   events are dropped (and logged) instead of piling up in the queue and
