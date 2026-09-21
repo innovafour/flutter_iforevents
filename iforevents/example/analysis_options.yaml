@@ -3,3 +3,15 @@ include: package:flutter_lints/flutter.yaml
 linter:
   rules:
     use_build_context_synchronously: false
+
+# Generated output and platform shells are not analyzed. Flutter 3.47+ writes
+# this block itself and the publish check then fails on a dirty tree.
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**

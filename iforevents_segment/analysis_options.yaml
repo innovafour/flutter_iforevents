@@ -16,3 +16,9 @@ linter:
     - require_trailing_commas
     - sort_child_properties_last
     - use_key_in_widget_constructors
+
+# Generated output and platform shells are not analyzed. Flutter 3.47+ writes
+# this block itself and the publish check then fails on a dirty tree.
+analyzer:
+  exclude:
+    - build/**
