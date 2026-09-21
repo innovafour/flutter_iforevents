@@ -20,7 +20,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  iforevents_segment: ^0.0.1
+  iforevents_segment: ^0.2.0
 ```
 
 ## Usage

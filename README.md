@@ -7,6 +7,13 @@
 
 A comprehensive Flutter package for event tracking and analytics integration. IForEvents provides a unified interface for multiple analytics platforms while automatically collecting device information and user data.
 
+> **Credentials.** The SDK takes a **project key** only. That key is public by
+> design: it grants event ingestion and nothing else, so shipping it inside your
+> app is safe. There is no project secret in the SDK — a value compiled into a
+> binary can be recovered with `strings`, so it could never have been secret.
+> Reading analytics requires a dashboard session instead. If a key is ever
+> abused, rotate it from the dashboard and old builds stop ingesting at once.
+
 ## Table of Contents
 
 - [IForEvents](#iforevents)
@@ -131,14 +138,14 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  iforevents: ^0.0.5
+  iforevents: ^0.2.0
   # Add the integrations you need
-  iforevents_firebase: ^0.0.3
-  iforevents_mixpanel: ^0.0.3
-  iforevents_amplitude: ^0.0.1
-  iforevents_algolia: ^0.0.3
-  iforevents_meta: ^0.0.3
-  iforevents_clevertap: ^0.0.3
+  iforevents_firebase: ^0.2.0
+  iforevents_mixpanel: ^0.2.0
+  iforevents_amplitude: ^0.2.0
+  iforevents_algolia: ^0.2.0
+  iforevents_meta: ^0.2.0
+  iforevents_clevertap: ^0.2.0
 ```
 
 Then run:
@@ -380,7 +387,6 @@ The `IForeventsAPIConfig` class provides comprehensive configuration options for
 final config = IForeventsAPIConfig(
   // Required
   projectKey: 'your-project-key',
-  projectSecret: 'your-project-secret',
   
   // Optional - Server Configuration
   baseUrl: 'https://api.iforevents.com', // Default
@@ -398,6 +404,13 @@ final config = IForeventsAPIConfig(
   enableRetry: true, // Enable automatic retry (default: true)
   maxRetries: 3, // Maximum retry attempts (default: 3)
   retryDelayMs: 1000, // Delay between retries (default: 1000ms)
+
+  // Optional - Privacy
+  // Off by default. When true the SDK calls api.ipify.org to resolve the
+  // device's public IP, which sends the user's address to a third party. The
+  // IForevents API already records the source IP of each request, so leaving
+  // this off loses nothing.
+  collectPublicIP: false,
   
   // Optional - Development & Debugging
   enableLogging: false, // Enable debug logs (default: false)
@@ -414,7 +427,6 @@ final config = IForeventsAPIConfig(
 ```dart
 final developmentConfig = IForeventsAPIConfig(
   projectKey: 'dev-project-key',
-  projectSecret: 'dev-project-secret',
   baseUrl: 'https://dev-api.iforevents.com',
   batchSize: 5, // Smaller batches for testing
   batchIntervalMs: 3000, // Check more frequently
@@ -430,7 +442,6 @@ final developmentConfig = IForeventsAPIConfig(
 ```dart
 final productionConfig = IForeventsAPIConfig(
   projectKey: const String.fromEnvironment('IFOREVENTS_PROJECT_KEY'),
-  projectSecret: const String.fromEnvironment('IFOREVENTS_PROJECT_SECRET'),
   baseUrl: 'https://api.iforevents.com',
   batchSize: 20, // Larger batches for efficiency
   batchIntervalMs: 10000, // Check every 10 seconds
@@ -448,7 +459,6 @@ final productionConfig = IForeventsAPIConfig(
 ```dart
 final realtimeConfig = IForeventsAPIConfig(
   projectKey: 'your-project-key',
-  projectSecret: 'your-project-secret',
   baseUrl: 'https://api.iforevents.com',
   batchSize: 1, // Send immediately
   enableRetry: true,
@@ -463,7 +473,6 @@ final realtimeConfig = IForeventsAPIConfig(
 ```dart
 final offlineConfig = IForeventsAPIConfig(
   projectKey: 'your-project-key',
-  projectSecret: 'your-project-secret',
   baseUrl: 'https://api.iforevents.com',
   batchSize: 100, // Very large batches
   batchIntervalMs: 30000, // Check every 30 seconds
@@ -525,7 +534,6 @@ This is the native integration with the Iforevents backend, included in the core
     // Use a predefined configuration
     final config = IForeventsConfigExamples.production(
       projectKey: const String.fromEnvironment('IFOREVENTS_PROJECT_KEY'),
-      projectSecret: const String.fromEnvironment('IFOREVENTS_PROJECT_SECRET'),
       baseUrl: 'https://api.iforevents.com',
     );
 
@@ -734,7 +742,6 @@ IForEvents provides comprehensive logging for debugging and monitoring:
 // Enable logging in development
 final config = IForeventsAPIConfig(
   projectKey: 'your-key',
-  projectSecret: 'your-secret',
   enableLogging: true, // Enable detailed logs
   throwOnError: true, // Throw exceptions for debugging
 );
@@ -742,7 +749,6 @@ final config = IForeventsAPIConfig(
 // Disable logging in production
 final productionConfig = IForeventsAPIConfig(
   projectKey: 'your-key',
-  projectSecret: 'your-secret',
   enableLogging: false, // Disable logs
   throwOnError: false, // Handle errors gracefully
 );
@@ -768,7 +774,6 @@ try {
 // Configure retry settings for poor network conditions
 final config = IForeventsAPIConfig(
   projectKey: 'your-key',
-  projectSecret: 'your-secret',
   enableRetry: true,
   maxRetries: 5, // Increase retries
   retryDelayMs: 3000, // Longer retry delay
@@ -847,7 +852,6 @@ await Iforevents.clearPendingEvents();
 ```dart
 final config = IForeventsAPIConfig(
   projectKey: 'your-key',
-  projectSecret: 'your-secret',
   batchSize: 50, // Larger batches for efficiency
   batchIntervalMs: 15000, // Less frequent network calls
 );
@@ -883,7 +887,6 @@ iforevents.track(
 // For poor network conditions
 final offlineConfig = IForeventsAPIConfig(
   projectKey: 'your-key',
-  projectSecret: 'your-secret',
   batchSize: 100, // Larger batches
   batchIntervalMs: 30000, // Less frequent attempts
   maxRetries: 5, // More retries
@@ -1033,7 +1036,6 @@ void main() {
       // Use test/development configuration
       final config = IForeventsAPIConfig(
         projectKey: 'test-project-key',
-        projectSecret: 'test-project-secret',
         baseUrl: 'https://test-api.iforevents.com',
         enableLogging: true,
       );
@@ -1126,8 +1128,13 @@ IForEvents automatically collects the following device information:
 - **OS Version**: Operating system version
 - **App Version**: Application version and build number
 - **Platform**: Target platform (Android, iOS, etc.)
-- **IP Address**: Both local and public IP addresses
 - **Timestamp**: Event timestamp in UTC
+
+#### Collected Only If You Opt In
+- **Public IP address**: requires `collectPublicIP: true`. It is resolved by
+  calling `api.ipify.org`, a third party, so it is off by default. The
+  IForevents API records the request's source IP server-side regardless, so
+  most apps should leave this off.
 
 #### Platform-Specific Data
 - **Android**: Android ID, SDK version, device specifications
@@ -1256,7 +1263,6 @@ class AnalyticsManager {
 // Configure what data to collect
 final privacyConfig = IForeventsAPIConfig(
   projectKey: 'your-key',
-  projectSecret: 'your-secret',
   enableLogging: false, // Disable logs that might contain PII
   requeueFailedEvents: false, // Don't store failed events
 );
@@ -1362,7 +1368,6 @@ class PageViewEvent {
 class IForeventsAPIConfig {
   const IForeventsAPIConfig({
     required this.projectKey,
-    required this.projectSecret,
     this.baseUrl = 'https://api.iforevents.com',
     this.batchSize = 10,
     this.batchIntervalMs = 5000,

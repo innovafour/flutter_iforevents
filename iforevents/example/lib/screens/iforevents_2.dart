@@ -39,8 +39,6 @@ class _IForeventsExampleState extends State<IForeventsExample> {
     // Example 1: Development/debug configuration
     final debugConfig = IForeventsAPIConfig(
       projectKey: 'your-project-key',
-      projectSecret: 'your-project-secret',
-      baseUrl: 'https://your-api-domain.com',
       batchSize: 5, // Smaller batches for testing
       batchIntervalMs: 3000, // Check every 3 seconds
       enableLogging: true, // Enable detailed logs
@@ -52,8 +50,6 @@ class _IForeventsExampleState extends State<IForeventsExample> {
     // Example 2: Basic configuration (recommended for production)
     final basicConfig = IForeventsAPIConfig(
       projectKey: 'your-project-key',
-      projectSecret: 'your-project-secret',
-      baseUrl: 'https://your-api-domain.com',
       batchSize: 10, // Send in batches of 10 events
       enableLogging: false, // Disable logs in production
     );
@@ -61,8 +57,6 @@ class _IForeventsExampleState extends State<IForeventsExample> {
     // Example 3: Immediate sending configuration (no batching)
     final immediateConfig = IForeventsAPIConfig(
       projectKey: 'your-project-key',
-      projectSecret: 'your-project-secret',
-      baseUrl: 'https://your-api-domain.com',
       batchSize: 1, // Immediate sending
       enableLogging: true,
     );
@@ -70,8 +64,6 @@ class _IForeventsExampleState extends State<IForeventsExample> {
     // Example 4: High frequency configuration
     final highVolumeConfig = IForeventsAPIConfig(
       projectKey: 'your-project-key',
-      projectSecret: 'your-project-secret',
-      baseUrl: 'https://your-api-domain.com',
       batchSize: 50, // Large batches
       batchIntervalMs: 10000, // Check every 10 seconds
       connectTimeoutMs: 15000, // Longer timeout
@@ -280,15 +272,15 @@ class _IForeventsExampleState extends State<IForeventsExample> {
                               label: 'Batch Size',
                               value: queueStatus!.batchSize,
                             ),
-                            if (queueStatus!.userUUID != null)
+                            if (queueStatus!.userId != null)
                               _StatusRow(
                                 label: 'User UUID',
-                                value: queueStatus!.userUUID!,
+                                value: queueStatus!.userId!,
                               ),
-                            if (queueStatus!.userUUID != null)
+                            if (queueStatus!.userId != null)
                               _StatusRow(
                                 label: 'User UUID',
-                                value: queueStatus!.userUUID!,
+                                value: queueStatus!.userId!,
                               ),
                           ] else
                             Text('Updating state...'),
@@ -480,13 +472,10 @@ class IForeventsConfigExamples {
   /// Configuration for production applications
   static IForeventsAPIConfig production({
     required String projectKey,
-    required String projectSecret,
     required String baseUrl,
   }) {
     return IForeventsAPIConfig(
       projectKey: projectKey,
-      projectSecret: projectSecret,
-      baseUrl: baseUrl,
       batchSize: 20, // Larger batches for efficiency
       batchIntervalMs: 10000, // Check every 10 seconds
       enableLogging: false, // No logs in production
@@ -503,13 +492,10 @@ class IForeventsConfigExamples {
   /// Configuration for development and testing
   static IForeventsAPIConfig development({
     required String projectKey,
-    required String projectSecret,
     required String baseUrl,
   }) {
     return IForeventsAPIConfig(
       projectKey: projectKey,
-      projectSecret: projectSecret,
-      baseUrl: baseUrl,
       batchSize: 5, // Small batches for testing
       batchIntervalMs: 3000, // Check frequently
       enableLogging: true, // Detailed logs
@@ -524,13 +510,10 @@ class IForeventsConfigExamples {
   /// Configuration for offline-first applications
   static IForeventsAPIConfig offlineFirst({
     required String projectKey,
-    required String projectSecret,
     required String baseUrl,
   }) {
     return IForeventsAPIConfig(
       projectKey: projectKey,
-      projectSecret: projectSecret,
-      baseUrl: baseUrl,
       batchSize: 100, // Very large batches
       batchIntervalMs: 30000, // Check every 30 seconds
       enableRetry: true,
@@ -546,13 +529,10 @@ class IForeventsConfigExamples {
   /// Configuration for real-time sending (no batching)
   static IForeventsAPIConfig realTime({
     required String projectKey,
-    required String projectSecret,
     required String baseUrl,
   }) {
     return IForeventsAPIConfig(
       projectKey: projectKey,
-      projectSecret: projectSecret,
-      baseUrl: baseUrl,
       batchSize: 1, // No batching
       enableRetry: true,
       maxRetries: 2,

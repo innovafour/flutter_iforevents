@@ -9,6 +9,7 @@ class MixpanelIntegration extends Integration {
     super.onIdentify,
     super.onTrack,
     super.onReset,
+    super.onPageView,
   });
 
   final String token;
@@ -56,8 +57,6 @@ class MixpanelIntegration extends Integration {
       people?.set(key, value.toString());
     }
 
-    await Future.delayed(const Duration(milliseconds: 1000));
-
     await mixpanel?.flush();
   }
 
@@ -74,6 +73,18 @@ class MixpanelIntegration extends Integration {
 
         return MapEntry(key, value.toString());
       }),
+    );
+  }
+
+  @override
+  Future<void> pageView({required PageViewEvent event}) async {
+    super.pageView(event: event);
+
+    await mixpanel?.track(
+      event.toRoute?.name ?? 'Unknown Screen',
+      properties: event.toJson().map(
+        (key, value) => MapEntry(key, value?.toString() ?? 'unknown'),
+      ),
     );
   }
 

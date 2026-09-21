@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze-and-test:
+    name: Analyze and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: subosito/flutter-action@f2c4f6686ca8e8d6e6d0f28410eeef506ed66aff # v2.18.0
+        with:
+          channel: stable
+          cache: true
+
+      # One resolve for the whole pub workspace. This is what makes the
+      # integration packages compile against the core in this repo instead of
+      # the last release on pub.dev.
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze every package
+        run: flutter analyze
+
+      - name: Test
+        working-directory: iforevents
+        run: flutter test --coverage
+
+      # Every package must be publishable, not just the core. A bad constraint
+      # in an integration package is only visible from its own directory.
+      - name: Check each package is publishable
+        run: |
+          set -e
+          for pkg in iforevents iforevents_algolia iforevents_amplitude \
+                     iforevents_clevertap iforevents_firebase iforevents_meta \
+                     iforevents_mixpanel iforevents_segment; do
+            echo "::group::$pkg"
+            (cd "$pkg" && flutter pub publish --dry-run)
+            echo "::endgroup::"
+          done
+
+      # The integration packages must never fall behind the core they are
+      # released against; a stale `^0.0.x` silently resolves users to an old
+      # core that still carries the removed credential model.
+      - name: Fail if an integration pins a stale core
+        run: |
+          core=$(grep -m1 '^version:' iforevents/pubspec.yaml | cut -d' ' -f2)
+          want="^${core%%+*}"
+          fail=0
+          for pkg in iforevents_algolia iforevents_amplitude iforevents_clevertap \
+                     iforevents_firebase iforevents_meta iforevents_mixpanel \
+                     iforevents_segment; do
+            got=$(grep -m1 '^  iforevents:' "$pkg/pubspec.yaml" | awk '{print $2}')
+            if [ "$got" != "$want" ]; then
+              echo "$pkg pins iforevents $got, core is $core (want $want)"
+              fail=1
+            fi
+          done
+          exit $fail
+
+      # A project secret must never reappear in the SDK: it would ship inside
+      # every build and could be extracted from the binary.
+      - name: Fail if a project secret is reintroduced
+        run: |
+          if grep -rn "projectSecret\|X-Project-Secret" --include="*.dart" iforevents/lib iforevents/example/lib; then
+            echo "the SDK must not carry a project secret"
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
+        if: always()
+        with:
+          name: coverage
+          path: iforevents/coverage/lcov.info

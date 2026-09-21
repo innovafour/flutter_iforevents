@@ -7,6 +7,7 @@ class ClevertapIntegration extends Integration {
     super.onIdentify,
     super.onTrack,
     super.onReset,
+    super.onPageView,
   });
 
   static bool isTheFirstTime = true;
@@ -40,14 +41,25 @@ class ClevertapIntegration extends Integration {
 
     switch (event.eventName) {
       case 'Order Completed':
-        final properties = event.properties;
-        final products = List<Map<String, dynamic>>.from(
-          properties['products'],
-        );
+        final raw = event.properties['products'];
 
-        properties.removeWhere((key, value) {
-          return ['products'].contains(key);
-        });
+        if (raw is! List) {
+          // No line items to charge against; record it as an ordinary event
+          // rather than throwing on the cast.
+          await CleverTapPlugin.recordEvent(event.eventName, event.properties);
+          break;
+        }
+
+        final products = raw
+            .whereType<Map>()
+            .map((p) => Map<String, dynamic>.from(p))
+            .toList();
+
+        // Copy before stripping: event.properties is the same map instance
+        // every other integration receives, so mutating it here would delete
+        // `products` for whichever integrations run after this one.
+        final properties = Map<String, dynamic>.from(event.properties)
+          ..remove('products');
 
         await CleverTapPlugin.recordChargedEvent(properties, products);
         break;
@@ -55,6 +67,13 @@ class ClevertapIntegration extends Integration {
         await CleverTapPlugin.recordEvent(event.eventName, event.properties);
         break;
     }
+  }
+
+  @override
+  Future<void> pageView({required PageViewEvent event}) async {
+    super.pageView(event: event);
+
+    await CleverTapPlugin.recordEvent('page_view', event.toJson());
   }
 
   @override

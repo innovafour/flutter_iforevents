@@ -1,3 +1,23 @@
+## 0.2.0
+
+* **Requires `iforevents` ^0.2.0.** Picks up the typed API errors and the
+  quota-aware queue of the core; no changes to this integration's own API.
+
+## 0.1.0
+
+### 💥 Breaking
+
+* **Requires `iforevents` ^0.1.0.** The previous `^0.0.5` constraint could not
+  resolve against the current core, so this package silently held users back on
+  the old core that still carried a project secret. Upgrade both together.
+
+### 🐛 Fixes
+
+* **Screen views now reach Firebase.** `pageView` was never overridden, so every
+  route change from `IforeventsRouteObserver` was silently dropped. It now calls
+  `logScreenView`.
+* `onPageView` is accepted by the constructor and forwarded to the caller.
+
 ## 0.0.3
 
 **Multi-Platform Support** 🌐

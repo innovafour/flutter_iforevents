@@ -1,7 +1,7 @@
 import 'package:amplitude_flutter/amplitude.dart';
+import 'package:amplitude_flutter/autocapture/autocapture.dart';
 import 'package:amplitude_flutter/configuration.dart';
 import 'package:amplitude_flutter/constants.dart';
-import 'package:amplitude_flutter/default_tracking.dart';
 import 'package:amplitude_flutter/events/base_event.dart';
 import 'package:amplitude_flutter/events/identify.dart' as amplitude_identify;
 import 'package:amplitude_flutter/events/revenue.dart';
@@ -14,7 +14,7 @@ class AmplitudeIntegration extends Integration {
     this.flushIntervalMillis = Constants.flushIntervalMillis,
     this.optOut = false,
     this.minIdLength,
-    this.defaultTracking = const DefaultTrackingOptions(),
+    this.autocapture = const AutocaptureOptions(),
     this.useBatch = false,
     this.serverZone = ServerZone.us,
     super.onInit,
@@ -29,7 +29,11 @@ class AmplitudeIntegration extends Integration {
   final int flushIntervalMillis;
   final bool optOut;
   final int? minIdLength;
-  final DefaultTrackingOptions defaultTracking;
+
+  /// Replaces the removed `defaultTracking`. The default value here resolves to
+  /// exactly what `DefaultTrackingOptions()` used to produce, so behaviour is
+  /// unchanged for callers that never set it.
+  final Autocapture autocapture;
   final bool useBatch;
   final ServerZone serverZone;
 
@@ -46,7 +50,7 @@ class AmplitudeIntegration extends Integration {
         flushIntervalMillis: flushIntervalMillis,
         optOut: optOut,
         minIdLength: minIdLength,
-        defaultTracking: defaultTracking,
+        autocapture: autocapture,
         useBatch: useBatch,
         serverZone: serverZone,
       ),
@@ -132,6 +136,13 @@ class AmplitudeIntegration extends Integration {
     amplitude_identify.Identify identify,
   ) async {
     amplitude?.groupIdentify(groupType, groupName, identify);
+  }
+
+  @override
+  Future<void> pageView({required PageViewEvent event}) async {
+    super.pageView(event: event);
+
+    amplitude?.track(BaseEvent('page_view', eventProperties: event.toJson()));
   }
 
   @override

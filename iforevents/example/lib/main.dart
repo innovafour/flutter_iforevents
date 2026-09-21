@@ -48,14 +48,16 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _initializeAnalytics() async {
+    // Key only: the public project key grants writes and nothing else, so it
+    // is safe in a shipped app. There is no project secret in client code.
     final config = IForeventsAPIConfig(
       projectKey: '<YOUR_PROJECT_KEY>',
-      projectSecret: '<YOUR_PROJECT_SECRET>',
-      baseUrl: 'http://192.168.1.13:8000',
       batchSize: 2,
       batchIntervalMs: 3000,
       enableLogging: true,
       throwOnError: false,
+      onQuotaExceeded: (error) =>
+          debugPrint('IForevents quota exceeded: ${error.used}/${error.limit}'),
     );
 
     await iforevents.init(

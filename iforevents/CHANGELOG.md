@@ -1,3 +1,92 @@
+## 0.2.0
+
+### ✨ Added
+
+* **Typed API errors.** `IForeventsQuotaExceededException` (429
+  `quota_exceeded`, with `limit`, `used` and `organizationUuid`),
+  `IForeventsAuthException` (401/403, refused project key) and
+  `IForeventsRateLimitedException` (429 rate limit, with `retryAfter`) replace
+  the bare `IForeventsAPIException` for those answers. All extend
+  `IForeventsAPIException`, which now carries `statusCode`, `details` and the
+  API's stable `code`.
+* **`IForeventsAPIConfig.onQuotaExceeded`** is called once when the API starts
+  refusing events for an exhausted monthly quota, so the app can show an
+  upgrade prompt. `IForeventsAPIIntegration.isQuotaExceeded` reports the
+  current state; it clears on the next accepted request.
+* **`Retry-After` is honored.** A plain 429 rate limit is retried after the
+  server's suggested wait instead of the fixed backoff.
+
+### 🔧 Changed
+
+* **Every request names the user in `X-User-Id`** (replaces `X-Custom-UUID`;
+  requires an api that accepts it). On first launch the integration
+  generates an anonymous id (`anon_...`), persists it and sends it with every
+  event, so users behind one carrier, NAT or proxy no longer collapse into a
+  single address-derived profile; `identify` switches the id to `customID`,
+  `reset` starts a fresh anonymous one. `identify` no longer has to succeed
+  before events are attributed: the api creates the profile on first sight.
+  Renames: `userUUID` → `userId`, `getStoredUserUUID` → `getStoredUserId`,
+  `clearStoredUserUUID` → `clearStoredUserId`,
+  `IForeventsQueueStatus.userUUID` → `userId` (`user_id` in `toJson`).
+* **Quota and credential failures no longer re-queue events.** An exhausted
+  quota or a refused key fails the same way on every retry, so the affected
+  events are dropped (and logged) instead of piling up in the queue and
+  draining the battery. Transient failures (network, 5xx, rate limits) still
+  re-queue when `requeueFailedEvents` is true.
+* `identify` failures now surface the typed exceptions as well.
+
+### 📦 Release
+
+* The key-only credential model of 0.1.0 is unchanged: the SDK sends
+  `X-Project-Key` only and has no place for a project secret. Every
+  integration package is released as 0.2.0 and pins `iforevents: ^0.2.0`.
+
+## 0.1.0
+
+### 💥 Breaking
+
+* **`IForeventsAPIConfig.projectSecret` is gone.** The SDK no longer sends
+  `X-Project-Secret`. A credential compiled into a mobile binary can be
+  extracted with `strings`, so it was never actually secret; the API treats the
+  project key as a public write-only credential. Reading analytics requires a
+  dashboard session.
+
+  Migration: delete the `projectSecret:` argument from your
+  `IForeventsAPIConfig`. Rotate any project secret that shipped inside a
+  released build.
+
+* **The public IP lookup is opt in.** Every session used to call `api.ipify.org`,
+  disclosing the user's address to a third party. Set `collectPublicIP: true` to
+  restore it. The API records the request's source IP server-side either way.
+
+### 🐛 Fixes
+
+* **Events from identified users are no longer recorded as anonymous.** The SDK
+  sent the user id in `X-User-UUID`; the API reads `X-Custom-UUID`. Nothing
+  errored — every event was simply filed without a user. On web it was worse:
+  `X-User-UUID` is not on the API's CORS allowlist, so the preflight failed and
+  ingestion stopped entirely.
+
+* **`identify` now keeps the uuid the server returns.** The response uuid was
+  written to local storage but never assigned to the in-memory field, so user
+  attribution only began working after the next app launch.
+
+* **Single-event tracking sends `event_type`.** With `batchSize: 1` the type was
+  omitted and the server defaulted every event to `track`, making page views
+  indistinguishable from ordinary events. The batch path already sent it.
+
+* **`identify` no longer propagates plugin failures to the host app.** Device
+  probing goes through platform plugins; a missing one threw straight into the
+  caller's login flow. `track`, `reset` and `pageViewed` already swallowed.
+
+### 🧹 Housekeeping
+
+* The repository is a pub workspace, so the integration packages compile against
+  the core in this repo rather than the last release on pub.dev. CI analyzes,
+  formats and dry-run-publishes all eight packages.
+* Tests cover the retry backoff, the pending-event queue round trip, the
+  configuration object, and the bytes the API integration puts on the wire.
+
 ## 0.0.5
 
 **Amplitude Integration** 📊

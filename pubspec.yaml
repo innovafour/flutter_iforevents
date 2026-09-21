@@ -1,0 +1,20 @@
+name: _iforevents_workspace
+publish_to: none
+
+# Pub workspace root. It exists so the integration packages resolve `iforevents`
+# from this repo instead of from pub.dev — without it, `flutter analyze` in
+# iforevents_firebase compiles against the last published core, and a breaking
+# change in the core is only discovered by users after release.
+environment:
+  sdk: ^3.8.1
+
+workspace:
+  - iforevents
+  - iforevents/example
+  - iforevents_algolia
+  - iforevents_amplitude
+  - iforevents_clevertap
+  - iforevents_firebase
+  - iforevents_meta
+  - iforevents_mixpanel
+  - iforevents_segment

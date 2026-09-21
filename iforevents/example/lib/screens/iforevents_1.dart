@@ -27,9 +27,7 @@ class _IForeventsAPIExamplePageState extends State<IForeventsAPIExamplePage> {
     try {
       // IForevents API integration configuration
       final config = IForeventsAPIConfig(
-        projectKey: 'demo-project-key', // Replace with your project key
-        projectSecret:
-            'demo-project-secret', // Replace with your project secret
+        projectKey: 'demo-project-key', // Replace with your public project key
         baseUrl: 'https://your-api-domain.com', // Replace with your base URL
         batchSize: 5, // Send events in batches of 5
         batchIntervalMs: 3000, // Check every 3 seconds
@@ -146,7 +144,7 @@ class _IForeventsAPIExamplePageState extends State<IForeventsAPIExamplePage> {
       final status = apiIntegration!.getQueueStatus();
       return 'Queue: ${status.queuedEvents}/${status.batchSize} events, '
           'Identified: ${status.isIdentified}, '
-          'User: ${status.userUUID ?? 'None'}';
+          'User: ${status.userId ?? 'None'}';
     }
     return 'API Integration not available';
   }

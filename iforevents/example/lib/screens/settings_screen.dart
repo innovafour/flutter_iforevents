@@ -169,7 +169,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         subtitle: Text(subtitle),
         value: value,
         onChanged: onChanged,
-        activeColor: Colors.orange,
+        activeThumbColor: Colors.orange,
       ),
     );
   }

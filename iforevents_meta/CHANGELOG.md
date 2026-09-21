@@ -1,3 +1,24 @@
+## 0.2.0
+
+* **Requires `iforevents` ^0.2.0.** Picks up the typed API errors and the
+  quota-aware queue of the core; no changes to this integration's own API.
+
+## 0.1.0
+
+### 💥 Breaking
+
+* **Requires `iforevents` ^0.1.0.** The previous `^0.0.5` constraint could not
+  resolve against the current core, so this package silently held users back on
+  the old core that still carried a project secret. Upgrade both together.
+
+### 🐛 Fixes
+
+* **`Order Completed` no longer crashes on a non-double total.** `total_amount`
+  arrives untyped from the caller, so an `int` or a numeric `String` threw a
+  cast error inside `logPurchase`. It is coerced now.
+* **Screen views now reach Meta.** `pageView` was never overridden.
+* `onPageView` is accepted by the constructor and forwarded to the caller.
+
 ## 0.0.3
 
 **Multi-Platform Support** 🌐

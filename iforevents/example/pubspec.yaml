@@ -18,6 +18,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # of the product and file versions while build-number is used as the build suffix.
 version: 1.0.0+1
 
+resolution: workspace
+
 environment:
   sdk: ^3.8.1
 
@@ -42,10 +44,6 @@ dependencies:
     path: ../../iforevents_firebase
   iforevents_mixpanel:
     path: ../../iforevents_mixpanel
-
-dependency_overrides: 
-  iforevents:
-    path: ../
 
 dev_dependencies:
   flutter_test:

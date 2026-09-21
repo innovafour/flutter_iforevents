@@ -1,10 +1,12 @@
 name: iforevents_amplitude
 description: "Amplitude analytics integration for IForEvents - Product analytics, user behavior tracking, and behavioral cohorts."
-version: 0.0.1
+version: 0.2.0
 homepage: https://github.com/innovafour/flutter_iforevents
 repository: https://github.com/innovafour/flutter_iforevents
 issue_tracker: https://github.com/innovafour/flutter_iforevents/issues
 documentation: https://pub.dev/documentation/iforevents_amplitude/latest/
+
+resolution: workspace
 
 environment:
   sdk: ^3.8.1
@@ -22,7 +24,7 @@ dependencies:
   flutter:
     sdk: flutter
   amplitude_flutter: ^4.2.0
-  iforevents: ^0.0.5
+  iforevents: ^0.2.0
 
 dev_dependencies:
   flutter_test:

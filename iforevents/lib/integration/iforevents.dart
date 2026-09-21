@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:iforevents/iforevents.dart';
 import 'package:iforevents/models/iforevents_api_config.dart';
+import 'package:uuid/uuid.dart';
 
 /// IForevents API Integration for Flutter
 ///
@@ -50,16 +51,21 @@ class IForeventsAPIIntegration extends Integration {
   final Dio _dio;
   final GetStorage _storage = GetStorage();
 
-  static const String _userUUIDKey = 'iforevents_user_uuid';
+  static const String _userIdKey = 'iforevents_user_id';
+  static const String _identifiedKey = 'iforevents_user_identified';
 
-  String? _userUUID;
+  /// The id every request carries in `X-User-Id`: an anonymous id generated
+  /// on first launch (`anon_...`), or the `customID` of the last identify.
+  /// Without it the api would file events under a profile derived from the
+  /// device's address, merging every user behind one carrier or NAT.
+  String? _userId;
   final List<IForeventsQueuedEvent> _eventQueue = [];
   Timer? _batchTimer;
   bool _isInitialized = false;
   bool _isIdentified = false;
 
-  /// User UUID from the last identify call
-  String? get userUUID => _userUUID;
+  /// The id events are attributed to (anonymous until identify).
+  String? get userId => _userId;
 
   /// Whether the integration has been initialized
   bool get isInitialized => _isInitialized;
@@ -71,6 +77,8 @@ class IForeventsAPIIntegration extends Integration {
   int get queuedEventsCount => _eventQueue.length;
 
   void _setupDio() {
+    Iforevents.collectPublicIP = config.collectPublicIP;
+
     _dio.options.baseUrl = '${config.baseUrl}/v1';
     _dio.options.connectTimeout = Duration(
       milliseconds: config.connectTimeoutMs,
@@ -89,11 +97,10 @@ class IForeventsAPIIntegration extends Integration {
           options.headers.addAll({
             'Content-Type': 'application/json',
             'X-Project-Key': config.projectKey,
-            'X-Project-Secret': config.projectSecret,
           });
 
-          if (_userUUID != null) {
-            options.headers['X-User-UUID'] = _userUUID;
+          if (_userId != null) {
+            options.headers['X-User-Id'] = _userId;
           }
 
           if (config.enableLogging) {
@@ -155,14 +162,24 @@ class IForeventsAPIIntegration extends Integration {
     try {
       super.init();
 
-      if (_userUUID == null) {
-        _userUUID = _storage.read(_userUUIDKey);
-        if (_userUUID != null) {
-          _isIdentified = true;
+      if (_userId == null) {
+        final stored = _storage.read<String>(_userIdKey);
+        if (stored != null && stored.isNotEmpty) {
+          _userId = stored;
+          _isIdentified = _storage.read<bool>(_identifiedKey) ?? false;
 
           if (config.enableLogging) {
             developer.log(
-              'Loaded saved userUUID: $_userUUID',
+              'Loaded saved user id: $_userId',
+              name: 'IForeventsAPI',
+            );
+          }
+        } else {
+          await _setUser(_anonymousId(), identified: false);
+
+          if (config.enableLogging) {
+            developer.log(
+              'Generated anonymous user id: $_userId',
               name: 'IForeventsAPI',
             );
           }
@@ -170,7 +187,7 @@ class IForeventsAPIIntegration extends Integration {
       } else {
         if (config.enableLogging) {
           developer.log(
-            'UserUUID already loaded in singleton: $_userUUID',
+            'User id already loaded in singleton: $_userId',
             name: 'IForeventsAPI',
           );
         }
@@ -207,49 +224,36 @@ class IForeventsAPIIntegration extends Integration {
     }
 
     try {
+      // Attribute from now on, even if the profile request itself fails:
+      // the api creates the profile on the first event it sees for this id.
+      if (event.customID.isNotEmpty) {
+        await _setUser(event.customID, identified: true);
+      }
+
       final requestData = _buildIdentifyRequest(event);
 
-      final response = await _dio.post('/events/identify', data: requestData);
+      await _dio.post('/events/identify', data: requestData);
 
-      if (response.data != null) {
-        final responseData = response.data as Map<String, dynamic>;
-        final user = responseData['user'] as Map<String, dynamic>?;
-
-        if (user != null) {
-          final userUUID = user['uuid'] as String?;
-
-          if (userUUID != null) {
-            await _storage.write(_userUUIDKey, userUUID);
-
-            if (config.enableLogging) {
-              developer.log(
-                'UserUUID updated and saved: $userUUID',
-                name: 'IForeventsAPI',
-              );
-            }
-          }
-
-          _isIdentified = true;
-
-          if (config.enableLogging) {
-            developer.log(
-              'User identified successfully. User: $userUUID',
-              name: 'IForeventsAPI',
-            );
-          }
-        }
+      if (config.enableLogging) {
+        developer.log(
+          'User identified successfully. User: $_userId',
+          name: 'IForeventsAPI',
+        );
       }
     } catch (e) {
+      final error = _classify(e);
+      _noteOutcome(error);
+
       if (config.enableLogging) {
         developer.log(
           'Failed to identify user: ${event.customID}',
           name: 'IForeventsAPI',
-          error: e,
+          error: error,
         );
       }
 
       if (config.throwOnError) {
-        rethrow;
+        throw error;
       }
     }
   }
@@ -322,11 +326,8 @@ class IForeventsAPIIntegration extends Integration {
         _eventQueue.clear();
       }
 
-      // Clear userUUID both in memory and storage
-      _userUUID = null;
-      _userUUID = null;
-      _isIdentified = false;
-      await _storage.remove(_userUUIDKey);
+      // Forget the person; the next events belong to a fresh anonymous id.
+      await _setUser(_anonymousId(), identified: false);
 
       if (config.enableLogging) {
         developer.log(
@@ -356,24 +357,38 @@ class IForeventsAPIIntegration extends Integration {
       batchSize: config.batchSize,
       isInitialized: _isInitialized,
       isIdentified: _isIdentified,
-      userUUID: _userUUID,
+      userId: _userId,
     );
   }
 
-  /// Get the userUUID stored in local storage (if any)
-  String? getStoredUserUUID() {
-    return _storage.read(_userUUIDKey);
+  /// Get the user id stored in local storage (if any)
+  String? getStoredUserId() {
+    return _storage.read<String>(_userIdKey);
   }
 
-  /// Clear the stored userUUID from local storage
-  Future<void> clearStoredUserUUID() async {
-    await _storage.remove(_userUUIDKey);
+  /// Clear the stored user id from local storage; the next init generates
+  /// a new anonymous one.
+  Future<void> clearStoredUserId() async {
+    await _storage.remove(_userIdKey);
+    await _storage.remove(_identifiedKey);
     if (config.enableLogging) {
       developer.log(
-        'Stored userUUID cleared from local storage',
+        'Stored user id cleared from local storage',
         name: 'IForeventsAPI',
       );
     }
+  }
+
+  Future<void> _setUser(String id, {required bool identified}) async {
+    _userId = id;
+    _isIdentified = identified;
+    await _storage.write(_userIdKey, id);
+    await _storage.write(_identifiedKey, identified);
+  }
+
+  /// A fresh anonymous id, unrelated to anything the server derives.
+  static String _anonymousId() {
+    return 'anon_${const Uuid().v4().replaceAll('-', '')}';
   }
 
   /// Reset the singleton instance completely
@@ -454,15 +469,96 @@ class IForeventsAPIIntegration extends Integration {
     }
   }
 
+  /// Set after a `quota_exceeded` answer; cleared by the next accepted request.
+  bool _quotaExceeded = false;
+
+  /// Whether the last ingest attempt was refused for an exhausted quota.
+  bool get isQuotaExceeded => _quotaExceeded;
+
+  /// Maps a transport error to the typed exceptions of [errors.dart].
+  IForeventsAPIException _classify(Object error) {
+    if (error is IForeventsAPIException) return error;
+    if (error is! DioException) {
+      return IForeventsAPIException(error.toString());
+    }
+    final response = error.response;
+    final status = response?.statusCode;
+    final data = response?.data;
+    final details = data is Map<String, dynamic> ? data : null;
+    final code = details?['error'];
+    final message =
+        (details?['message'] ?? code ?? error.message ?? 'request failed')
+            .toString();
+
+    if (status == 429 && code == 'quota_exceeded') {
+      return IForeventsQuotaExceededException(
+        message,
+        details: details,
+        limit: _asInt(details?['limit']),
+        used: _asInt(details?['used']),
+        organizationUuid: details?['org_uuid'] as String?,
+      );
+    }
+    if (status == 429) {
+      final header = response?.headers.value('retry-after');
+      final seconds = header == null ? null : int.tryParse(header);
+      return IForeventsRateLimitedException(
+        message,
+        details: details,
+        retryAfter: seconds == null ? null : Duration(seconds: seconds),
+      );
+    }
+    if (status == 401 || status == 403) {
+      return IForeventsAuthException(
+        message,
+        statusCode: status,
+        details: details,
+      );
+    }
+    return IForeventsAPIException(
+      message,
+      statusCode: status,
+      details: details,
+    );
+  }
+
+  static int? _asInt(Object? value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  /// Quota and credential failures are permanent for the events at hand.
+  bool _isPermanent(IForeventsAPIException error) =>
+      error is IForeventsQuotaExceededException ||
+      error is IForeventsAuthException;
+
+  void _noteOutcome(IForeventsAPIException? error) {
+    if (error is IForeventsQuotaExceededException) {
+      if (!_quotaExceeded) {
+        _quotaExceeded = true;
+        config.onQuotaExceeded?.call(error);
+      }
+    } else if (error == null) {
+      _quotaExceeded = false;
+    }
+  }
+
   Future<void> _sendSingleEvent(IForeventsQueuedEvent eventData) async {
     try {
       await _dio.post(
         '/events/track',
         data: {
           'event_name': eventData.name,
+          // Without this the server defaults every event to "track" and page
+          // views become indistinguishable from ordinary events.
+          'event_type': eventData.type,
           'properties': eventData.properties,
         },
       );
+
+      _noteOutcome(null);
 
       if (config.enableLogging) {
         developer.log(
@@ -471,14 +567,17 @@ class IForeventsAPIIntegration extends Integration {
         );
       }
     } catch (e) {
+      final error = _classify(e);
+      _noteOutcome(error);
+
       if (config.enableLogging) {
         developer.log(
           'Failed to send single event: ${eventData.name}',
           name: 'IForeventsAPI',
-          error: e,
+          error: error,
         );
       }
-      rethrow;
+      throw error;
     }
   }
 
@@ -489,6 +588,7 @@ class IForeventsAPIIntegration extends Integration {
       final body = events.map((e) => e.toJson()).toList();
 
       await _dio.post('/events/batch', data: {'events': body});
+      _noteOutcome(null);
 
       if (config.enableLogging) {
         developer.log(
@@ -497,20 +597,25 @@ class IForeventsAPIIntegration extends Integration {
         );
       }
     } catch (e) {
+      final error = _classify(e);
+      _noteOutcome(error);
+
       if (config.enableLogging) {
         developer.log(
           'Failed to send batch of ${events.length} events',
           name: 'IForeventsAPI',
-          error: e,
+          error: error,
         );
       }
 
-      // Re-queue events if configured to do so
-      if (config.requeueFailedEvents) {
+      // Transient failures go back to the front of the queue; an exhausted
+      // quota or a refused key would fail the same way forever, so those
+      // events are dropped.
+      if (config.requeueFailedEvents && !_isPermanent(error)) {
         _eventQueue.insertAll(0, events);
       }
 
-      rethrow;
+      throw error;
     }
   }
 
@@ -551,14 +656,16 @@ class IForeventsQueueStatus {
     required this.batchSize,
     required this.isInitialized,
     required this.isIdentified,
-    this.userUUID,
+    this.userId,
   });
 
   final int queuedEvents;
   final int batchSize;
   final bool isInitialized;
   final bool isIdentified;
-  final String? userUUID;
+
+  /// The id events are attributed to (`X-User-Id`).
+  final String? userId;
 
   Map<String, dynamic> toJson() {
     return {
@@ -566,19 +673,9 @@ class IForeventsQueueStatus {
       'batch_size': batchSize,
       'is_initialized': isInitialized,
       'is_identified': isIdentified,
-      'user_uuid': userUUID,
+      'user_id': userId,
     };
   }
-}
-
-/// Exception class for IForevents API errors
-class IForeventsAPIException implements Exception {
-  const IForeventsAPIException(this.message);
-
-  final String message;
-
-  @override
-  String toString() => 'IForeventsAPIException: $message';
 }
 
 /// Internal retry interceptor for Dio
@@ -606,7 +703,7 @@ class _IForeventsRetryInterceptor extends Interceptor {
     if (retryCount < retries && _shouldRetry(err)) {
       extra['retry_count'] = retryCount + 1;
 
-      final delay = Duration(milliseconds: retryDelayMs * (retryCount + 1));
+      final delay = _delayFor(err, retryCount);
       await Future.delayed(delay);
 
       if (enableLogging) {
@@ -631,11 +728,29 @@ class _IForeventsRetryInterceptor extends Interceptor {
   bool _shouldRetry(DioException error) {
     final statusCode = error.response?.statusCode;
 
-    // Retry on network errors or 5xx server errors
+    // Retry on network errors, 5xx server errors and short rate limits. A
+    // quota_exceeded 429 is not a rate limit: it holds until the next month
+    // or a plan change, so retrying it is pointless.
     return error.type == DioExceptionType.connectionTimeout ||
         error.type == DioExceptionType.receiveTimeout ||
         error.type == DioExceptionType.sendTimeout ||
         error.type == DioExceptionType.connectionError ||
-        (statusCode != null && statusCode >= 500);
+        (statusCode != null && statusCode >= 500) ||
+        (statusCode == 429 && !_isQuotaExceeded(error));
+  }
+
+  static bool _isQuotaExceeded(DioException error) {
+    final data = error.response?.data;
+    return data is Map && data['error'] == 'quota_exceeded';
+  }
+
+  /// Server-suggested wait for a 429, else the linear backoff.
+  Duration _delayFor(DioException error, int attempt) {
+    final header = error.response?.headers.value('retry-after');
+    final seconds = header == null ? null : int.tryParse(header);
+    if (error.response?.statusCode == 429 && seconds != null && seconds > 0) {
+      return Duration(seconds: seconds);
+    }
+    return Duration(milliseconds: retryDelayMs * (attempt + 1));
   }
 }

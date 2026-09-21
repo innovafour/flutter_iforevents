@@ -2,3 +2,9 @@ include: package:flutter_lints/flutter.yaml
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
+
+# Generated output and platform shells are not analyzed. Flutter 3.47+ writes
+# this block itself and the publish check then fails on a dirty tree.
+analyzer:
+  exclude:
+    - build/**

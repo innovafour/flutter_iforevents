@@ -111,7 +111,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _selectedPlan,
+              initialValue: _selectedPlan,
               decoration: InputDecoration(
                 labelText: 'Subscription Plan',
                 border: OutlineInputBorder(),

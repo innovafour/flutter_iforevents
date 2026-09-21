@@ -1,10 +1,12 @@
 name: iforevents_mixpanel
 description: "Mixpanel analytics integration for IForEvents - Advanced user behavior tracking, funnel analysis, and retention insights."
-version: 0.0.3
+version: 0.2.0
 homepage: https://github.com/innovafour/flutter_iforevents
 repository: https://github.com/innovafour/flutter_iforevents
 issue_tracker: https://github.com/innovafour/flutter_iforevents/issues
 documentation: https://pub.dev/documentation/iforevents_mixpanel/latest/
+
+resolution: workspace
 
 environment:
   sdk: ^3.8.1
@@ -22,7 +24,7 @@ dependencies:
   flutter:
     sdk: flutter
   mixpanel_flutter: ^2.4.4
-  iforevents: ^0.0.5
+  iforevents: ^0.2.0
 
 dev_dependencies:
   flutter_test:

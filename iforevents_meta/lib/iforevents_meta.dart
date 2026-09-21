@@ -7,6 +7,7 @@ class MetaIntegration extends Integration {
     super.onIdentify,
     super.onTrack,
     super.onReset,
+    super.onPageView,
   });
 
   static final facebookAppEvents = FacebookAppEvents();
@@ -45,14 +46,32 @@ class MetaIntegration extends Integration {
     if (event.eventName == 'Order Completed') {
       await facebookAppEvents.logPurchase(
         parameters: properties,
-        amount: event.properties['total_amount'] ?? 0.0,
-        currency: event.properties['currency'] ?? 'COP',
+        // Properties arrive untyped from the caller, so an int or a numeric
+        // string here would blow up the cast. Coerce instead of trusting it.
+        amount: _toAmount(event.properties['total_amount']),
+        currency: event.properties['currency']?.toString() ?? 'COP',
       );
 
       return;
     }
 
     await facebookAppEvents.logEvent(name: eventName, parameters: properties);
+  }
+
+  static double _toAmount(dynamic value) {
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
+  }
+
+  @override
+  Future<void> pageView({required PageViewEvent event}) async {
+    super.pageView(event: event);
+
+    await facebookAppEvents.logEvent(
+      name: 'page_view',
+      parameters: event.toJson(),
+    );
   }
 
   @override
