@@ -28,7 +28,6 @@ class Iforevents {
   /// Constructs a [Iforevents] instance.
   const Iforevents();
 
-  static Map<String, dynamic> _identifyData = {};
   static Device? _deviceData;
   static bool _isInitialized = false;
 
@@ -76,9 +75,10 @@ class Iforevents {
     try {
       final device = await deviceData;
 
+      final publicIp = await ip;
       final data = {
-        'ip': await ip,
-        'device_ip': device.ip,
+        if (publicIp.isNotEmpty) 'ip': publicIp,
+        if (device.ip.isNotEmpty) 'device_ip': device.ip,
         'device_brand': device.brand,
         'device_model': device.model,
         'device_os_version': device.osVersion,
@@ -101,8 +101,6 @@ class Iforevents {
           retryIntervalSeconds: retryIntervals[0],
         ),
       );
-
-      _identifyData = data;
     } catch (e) {
       // Device probing goes through platform plugins; a missing one must not
       // take down the host app's login flow. track/reset/pageViewed already
@@ -119,8 +117,11 @@ class Iforevents {
         return;
       }
 
-      final tempData = {..._identifyData, ...event.properties};
-      final processedEvent = event.copyWith(properties: flattenMap(tempData));
+      // The identify traits and device data went once, with identify; every
+      // backend keeps them on the profile, so events carry only their own.
+      final processedEvent = event.copyWith(
+        properties: flattenMap(event.properties),
+      );
 
       final results = await IntegrationFactory.track(event: processedEvent);
 
@@ -154,8 +155,6 @@ class Iforevents {
           log('Error resetting ${result.integrationName}: ${result.error}');
         }
       }
-
-      _identifyData = {};
     } catch (e) {
       log('Error in reset: $e');
       return;

@@ -12,8 +12,8 @@ class IForeventsAPIConfig {
   const IForeventsAPIConfig({
     required this.projectKey,
     this.baseUrl = 'https://api.iforevents.com',
-    this.batchSize = 10,
-    this.batchIntervalMs = 5000,
+    this.batchSize = 20,
+    this.batchIntervalMs = 10000,
     this.connectTimeoutMs = 10000,
     this.receiveTimeoutMs = 10000,
     this.sendTimeoutMs = 10000,
@@ -33,10 +33,12 @@ class IForeventsAPIConfig {
   /// Base URL of the IForevents API.
   final String baseUrl;
 
-  /// Events to accumulate before sending. Set to 1 to disable batching.
+  /// Events to accumulate before sending (default 20). Set to 1 to disable
+  /// batching. One request for many events is the cheap path for the
+  /// device, the network and the api.
   final int batchSize;
 
-  /// How often the batch timer fires, in milliseconds.
+  /// How often the batch timer fires, in milliseconds (default 10000).
   final int batchIntervalMs;
 
   final int connectTimeoutMs;

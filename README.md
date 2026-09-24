@@ -392,8 +392,8 @@ final config = IForeventsAPIConfig(
   baseUrl: 'https://api.iforevents.com', // Default
   
   // Optional - Batching Configuration
-  batchSize: 10, // Events per batch (default: 10, set to 1 for immediate sending)
-  batchIntervalMs: 5000, // Check interval in ms (default: 5000ms)
+  batchSize: 20, // Events per batch (default: 20, set to 1 for immediate sending)
+  batchIntervalMs: 10000, // Check interval in ms (default: 10000ms)
   
   // Optional - Network Timeouts
   connectTimeoutMs: 10000, // Connection timeout (default: 10000ms)
@@ -1369,7 +1369,7 @@ class IForeventsAPIConfig {
   const IForeventsAPIConfig({
     required this.projectKey,
     this.baseUrl = 'https://api.iforevents.com',
-    this.batchSize = 10,
+    this.batchSize = 20,
     this.batchIntervalMs = 5000,
     this.connectTimeoutMs = 10000,
     this.receiveTimeoutMs = 10000,

@@ -1,3 +1,12 @@
+## Unreleased
+
+### Changed
+
+* **Batching defaults: 20 events or 10 seconds** (were 10 and 5).
+* **Traits are not copied into events.** identify sends the traits and the
+  device data once; track events carry only their own properties. Every
+  backend keeps the traits on the user's profile.
+
 ## 0.2.0
 
 ### ✨ Added
