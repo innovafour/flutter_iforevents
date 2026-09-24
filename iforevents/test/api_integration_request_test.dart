@@ -323,4 +323,22 @@ void main() {
       expect(events[0]['message_id'], isNot(events[1]['message_id']));
     },
   );
+
+  test(
+    'a failing context provider sends {} and the event still goes',
+    () async {
+      final integration = build(
+        eventContext: () async => throw StateError('no device info'),
+      );
+      await integration.init();
+
+      await integration.track(event: const TrackEvent(eventName: 'a'));
+
+      final track = captured.firstWhere(
+        (r) => r.path.endsWith('/events/track'),
+      );
+      expect(track.body['event_name'], 'a');
+      expect(track.body['context'], <String, dynamic>{});
+    },
+  );
 }
