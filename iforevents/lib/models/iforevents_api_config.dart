@@ -25,6 +25,7 @@ class IForeventsAPIConfig {
     this.requeueFailedEvents = true,
     this.collectPublicIP = false,
     this.onQuotaExceeded,
+    this.eventContext,
   });
 
   /// Public project write key (required).
@@ -70,6 +71,13 @@ class IForeventsAPIConfig {
   /// loses nothing.
   final bool collectPublicIP;
 
+  /// The device and app context sent as `context` with every request, in the
+  /// shape of schema 2 of the IForevents events bus (sdks/CONTRACT.md
+  /// section 3.1). When null the integration builds it from the device and
+  /// package info plugins: library, device type and model, OS, app and
+  /// locale.
+  final Future<Map<String, dynamic>> Function()? eventContext;
+
   IForeventsAPIConfig copyWith({
     String? projectKey,
     String? baseUrl,
@@ -85,6 +93,7 @@ class IForeventsAPIConfig {
     bool? throwOnError,
     bool? requeueFailedEvents,
     bool? collectPublicIP,
+    Future<Map<String, dynamic>> Function()? eventContext,
   }) {
     return IForeventsAPIConfig(
       projectKey: projectKey ?? this.projectKey,
@@ -101,6 +110,7 @@ class IForeventsAPIConfig {
       throwOnError: throwOnError ?? this.throwOnError,
       requeueFailedEvents: requeueFailedEvents ?? this.requeueFailedEvents,
       collectPublicIP: collectPublicIP ?? this.collectPublicIP,
+      eventContext: eventContext ?? this.eventContext,
     );
   }
 }

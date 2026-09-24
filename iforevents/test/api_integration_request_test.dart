@@ -102,7 +102,10 @@ void main() {
     await server.close(force: true);
   });
 
-  IForeventsAPIIntegration build() {
+  IForeventsAPIIntegration build({
+    int batchSize = 1,
+    Future<Map<String, dynamic>> Function()? eventContext,
+  }) {
     IForeventsAPIIntegration.resetSingleton();
 
     return IForeventsAPIIntegration(
@@ -111,11 +114,17 @@ void main() {
         baseUrl: baseUrl,
         // batchSize 1 takes the single-event path, which is the one that used
         // to drop event_type.
-        batchSize: 1,
+        batchSize: batchSize,
+        batchIntervalMs: 60000,
         enableRetry: false,
+        eventContext: eventContext,
       ),
     );
   }
+
+  final uuid4 = RegExp(
+    r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
+  );
 
   test(
     'single track sends event_type so page views stay distinguishable',
@@ -201,4 +210,117 @@ void main() {
     final track = captured.lastWhere((r) => r.path.endsWith('/events/track'));
     expect(track.headers['x-user-id'], integration.userId);
   });
+
+  test('every call carries a unique message_id', () async {
+    final integration = build();
+    await integration.init();
+
+    await integration.identify(
+      event: const IdentifyEvent(customID: 'abc', properties: {}),
+    );
+    await integration.track(event: const TrackEvent(eventName: 'a'));
+    await integration.track(event: const TrackEvent(eventName: 'b'));
+
+    final ids = [for (final r in captured) r.body['message_id'] as String?];
+    expect(ids, hasLength(3));
+    for (final id in ids) {
+      expect(id, matches(uuid4));
+    }
+    expect(ids.toSet(), hasLength(3));
+  });
+
+  test('anonymous_id is kept after identify and renewed on reset', () async {
+    // Storage outlives a test: start as a device that never ran the SDK.
+    await GetStorage().erase();
+    final integration = build();
+    await integration.init();
+    final anon = integration.anonymousId;
+    expect(anon, startsWith('anon_'));
+    expect(integration.userId, anon);
+
+    await integration.track(event: const TrackEvent(eventName: 'before'));
+    await integration.identify(
+      event: const IdentifyEvent(customID: 'abc', properties: {}),
+    );
+    await integration.track(event: const TrackEvent(eventName: 'after'));
+
+    final tracks = captured
+        .where((r) => r.path.endsWith('/events/track'))
+        .toList();
+    expect(tracks[0].headers['x-user-id'], anon);
+    expect(tracks[0].body['anonymous_id'], anon);
+    expect(tracks[1].headers['x-user-id'], 'abc');
+    expect(tracks[1].body['anonymous_id'], anon);
+    final identify = captured.firstWhere(
+      (r) => r.path.endsWith('/events/identify'),
+    );
+    expect(identify.body['anonymous_id'], anon);
+
+    await integration.reset();
+    expect(integration.anonymousId, startsWith('anon_'));
+    expect(integration.anonymousId, isNot(anon));
+    expect(integration.userId, integration.anonymousId);
+  });
+
+  test('sent_at and context travel with every request', () async {
+    final integration = build(
+      eventContext: () async => {
+        'library': {'name': 'iforevents', 'version': '9.9.9'},
+        'locale': 'es-CO',
+        'device': {'type': 'android'},
+      },
+    );
+    await integration.init();
+    final before = DateTime.now().toUtc().subtract(const Duration(seconds: 1));
+
+    await integration.track(event: const TrackEvent(eventName: 'a'));
+
+    final track = captured.firstWhere((r) => r.path.endsWith('/events/track'));
+    expect(
+      DateTime.parse(track.body['sent_at'] as String).isAfter(before),
+      isTrue,
+    );
+    expect(track.body['context'], {
+      'library': {'name': 'iforevents', 'version': '9.9.9'},
+      'locale': 'es-CO',
+      'device': {'type': 'android'},
+    });
+  });
+
+  test('the default context names the library even without plugins', () async {
+    final integration = build();
+    await integration.init();
+
+    await integration.track(event: const TrackEvent(eventName: 'a'));
+
+    final track = captured.firstWhere((r) => r.path.endsWith('/events/track'));
+    final context = track.body['context'] as Map<String, dynamic>;
+    expect(context['library'], {
+      'name': iforeventsLibraryName,
+      'version': iforeventsLibraryVersion,
+    });
+  });
+
+  test(
+    'a batch carries the envelope once and a message_id per event',
+    () async {
+      final integration = build(batchSize: 2);
+      await integration.init();
+
+      await integration.track(event: const TrackEvent(eventName: 'a'));
+      await integration.track(event: const TrackEvent(eventName: 'b'));
+
+      final batch = captured.firstWhere(
+        (r) => r.path.endsWith('/events/batch'),
+      );
+      expect(batch.body['anonymous_id'], integration.anonymousId);
+      expect(batch.body['sent_at'], isA<String>());
+      expect(batch.body['context'], isA<Map<String, dynamic>>());
+      final events = (batch.body['events'] as List)
+          .cast<Map<String, dynamic>>();
+      expect(events, hasLength(2));
+      expect(events[0]['message_id'], matches(uuid4));
+      expect(events[0]['message_id'], isNot(events[1]['message_id']));
+    },
+  );
 }

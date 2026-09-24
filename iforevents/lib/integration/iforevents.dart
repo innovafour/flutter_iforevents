@@ -1,11 +1,17 @@
 import 'dart:async';
 import 'dart:developer' as developer;
+import 'dart:ui' as ui;
 
 import 'package:dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:iforevents/iforevents.dart';
 import 'package:iforevents/models/iforevents_api_config.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:uuid/uuid.dart';
+
+/// Name and version the SDK reports as `context.library`.
+const String iforeventsLibraryName = 'iforevents';
+const String iforeventsLibraryVersion = '0.2.0';
 
 /// IForevents API Integration for Flutter
 ///
@@ -54,11 +60,18 @@ class IForeventsAPIIntegration extends Integration {
   static const String _userIdKey = 'iforevents_user_id';
   static const String _identifiedKey = 'iforevents_user_identified';
 
+  /// The anon_ id of this device, kept after identify (sent as
+  /// `anonymous_id` so destinations can merge the anonymous history) until
+  /// reset.
+  static const String _anonymousIdKey = 'iforevents_anonymous_id';
+
   /// The id every request carries in `X-User-Id`: an anonymous id generated
   /// on first launch (`anon_...`), or the `customID` of the last identify.
   /// Without it the api would file events under a profile derived from the
   /// device's address, merging every user behind one carrier or NAT.
   String? _userId;
+  String? _anonId;
+  Map<String, dynamic>? _defaultContext;
   final List<IForeventsQueuedEvent> _eventQueue = [];
   Timer? _batchTimer;
   bool _isInitialized = false;
@@ -66,6 +79,10 @@ class IForeventsAPIIntegration extends Integration {
 
   /// The id events are attributed to (anonymous until identify).
   String? get userId => _userId;
+
+  /// The `anon_...` id of this device, sent as `anonymous_id`; it survives
+  /// identify and changes on reset.
+  String? get anonymousId => _anonId;
 
   /// Whether the integration has been initialized
   bool get isInitialized => _isInitialized;
@@ -162,11 +179,18 @@ class IForeventsAPIIntegration extends Integration {
     try {
       super.init();
 
+      var anon = _storage.read<String>(_anonymousIdKey);
       if (_userId == null) {
         final stored = _storage.read<String>(_userIdKey);
         if (stored != null && stored.isNotEmpty) {
           _userId = stored;
           _isIdentified = _storage.read<bool>(_identifiedKey) ?? false;
+          // Storage written before anonymous_id existed: an unidentified
+          // user id is the anon id.
+          if ((anon == null || anon.isEmpty) && !_isIdentified) anon = stored;
+          await _setAnonymous(
+            anon == null || anon.isEmpty ? _newAnonymousId() : anon,
+          );
 
           if (config.enableLogging) {
             developer.log(
@@ -175,7 +199,10 @@ class IForeventsAPIIntegration extends Integration {
             );
           }
         } else {
-          await _setUser(_anonymousId(), identified: false);
+          await _setAnonymous(
+            anon == null || anon.isEmpty ? _newAnonymousId() : anon,
+          );
+          await _setUser(_anonId!, identified: false);
 
           if (config.enableLogging) {
             developer.log(
@@ -185,6 +212,7 @@ class IForeventsAPIIntegration extends Integration {
           }
         }
       } else {
+        _anonId ??= anon;
         if (config.enableLogging) {
           developer.log(
             'User id already loaded in singleton: $_userId',
@@ -232,7 +260,10 @@ class IForeventsAPIIntegration extends Integration {
 
       final requestData = _buildIdentifyRequest(event);
 
-      await _dio.post('/events/identify', data: requestData);
+      await _dio.post(
+        '/events/identify',
+        data: {...requestData, ...await _envelope()},
+      );
 
       if (config.enableLogging) {
         developer.log(
@@ -327,7 +358,8 @@ class IForeventsAPIIntegration extends Integration {
       }
 
       // Forget the person; the next events belong to a fresh anonymous id.
-      await _setUser(_anonymousId(), identified: false);
+      await _setAnonymous(_newAnonymousId());
+      await _setUser(_anonId!, identified: false);
 
       if (config.enableLogging) {
         developer.log(
@@ -379,6 +411,86 @@ class IForeventsAPIIntegration extends Integration {
     }
   }
 
+  Future<void> _setAnonymous(String id) async {
+    _anonId = id;
+    await _storage.write(_anonymousIdKey, id);
+  }
+
+  /// What every request adds to its events (schema 2 of the events bus):
+  /// the anonymous id, the send time on this clock and the device context.
+  Future<Map<String, dynamic>> _envelope() async {
+    return {
+      if (_anonId != null) 'anonymous_id': _anonId,
+      'sent_at': DateTime.now().toUtc().toIso8601String(),
+      'context': await _eventContext(),
+    };
+  }
+
+  Future<Map<String, dynamic>> _eventContext() async {
+    final provider = config.eventContext;
+    if (provider != null) {
+      try {
+        return await provider();
+      } catch (e) {
+        if (config.enableLogging) {
+          developer.log(
+            'Event context provider failed',
+            name: 'IForeventsAPI',
+            error: e,
+          );
+        }
+        return {};
+      }
+    }
+    return _defaultContext ??= await _buildDefaultContext();
+  }
+
+  /// Library, device type and model, OS, app and locale, from the plugins
+  /// the SDK already uses. A plugin that is missing leaves its fields out.
+  /// No hardware device id is sent: it would reach every destination.
+  static Future<Map<String, dynamic>> _buildDefaultContext() async {
+    final context = <String, dynamic>{
+      'library': {
+        'name': iforeventsLibraryName,
+        'version': iforeventsLibraryVersion,
+      },
+    };
+    try {
+      final locale = ui.PlatformDispatcher.instance.locale.toLanguageTag();
+      if (locale.isNotEmpty && locale != 'und') context['locale'] = locale;
+    } catch (_) {}
+    try {
+      final device = await Iforevents.deviceData;
+      final platform = device.platform;
+      final type = const {'ios', 'android', 'web'}.contains(platform)
+          ? platform
+          : 'desktop';
+      context['device'] = {
+        'type': type,
+        if (platform != 'web' && device.brand.isNotEmpty)
+          'manufacturer': device.brand,
+        if (platform != 'web' && device.model.isNotEmpty) 'model': device.model,
+      };
+      final release = device.data['version_release'];
+      context['os'] = {
+        'name': platform,
+        if (release is String && release.isNotEmpty)
+          'version': release
+        else if (device.osVersion.isNotEmpty)
+          'version': device.osVersion,
+      };
+    } catch (_) {}
+    try {
+      final info = await PackageInfo.fromPlatform();
+      context['app'] = {
+        if (info.appName.isNotEmpty) 'name': info.appName,
+        if (info.version.isNotEmpty) 'version': info.version,
+        if (info.buildNumber.isNotEmpty) 'build': info.buildNumber,
+      };
+    } catch (_) {}
+    return context;
+  }
+
   Future<void> _setUser(String id, {required bool identified}) async {
     _userId = id;
     _isIdentified = identified;
@@ -387,7 +499,7 @@ class IForeventsAPIIntegration extends Integration {
   }
 
   /// A fresh anonymous id, unrelated to anything the server derives.
-  static String _anonymousId() {
+  static String _newAnonymousId() {
     return 'anon_${const Uuid().v4().replaceAll('-', '')}';
   }
 
@@ -406,7 +518,10 @@ class IForeventsAPIIntegration extends Integration {
   }
 
   Map<String, dynamic> _buildIdentifyRequest(IdentifyEvent event) {
-    final request = <String, dynamic>{'custom_id': event.customID};
+    final request = <String, dynamic>{
+      'custom_id': event.customID,
+      'message_id': const Uuid().v4(),
+    };
 
     // Extract standard fields if present
     final properties = Map<String, dynamic>.from(event.properties);
@@ -435,6 +550,7 @@ class IForeventsAPIIntegration extends Integration {
       type: _mapEventType(event.eventType),
       properties: event.properties,
       createdAt: DateTime.now().toUtc(),
+      messageId: const Uuid().v4(),
     );
   }
 
@@ -555,6 +671,8 @@ class IForeventsAPIIntegration extends Integration {
           // views become indistinguishable from ordinary events.
           'event_type': eventData.type,
           'properties': eventData.properties,
+          if (eventData.messageId != null) 'message_id': eventData.messageId,
+          ...await _envelope(),
         },
       );
 
@@ -587,7 +705,10 @@ class IForeventsAPIIntegration extends Integration {
     try {
       final body = events.map((e) => e.toJson()).toList();
 
-      await _dio.post('/events/batch', data: {'events': body});
+      await _dio.post(
+        '/events/batch',
+        data: {'events': body, ...await _envelope()},
+      );
       _noteOutcome(null);
 
       if (config.enableLogging) {
@@ -632,6 +753,7 @@ class IForeventsQueuedEvent {
     required this.type,
     required this.properties,
     required this.createdAt,
+    this.messageId,
   });
 
   final String name;
@@ -639,12 +761,16 @@ class IForeventsQueuedEvent {
   final Map<String, dynamic> properties;
   final DateTime createdAt;
 
+  /// Unique per call; destinations deduplicate retried deliveries on it.
+  final String? messageId;
+
   Map<String, dynamic> toJson() {
     return {
       'name': name,
       'type': type,
       'properties': properties,
       'created_at': createdAt.toIso8601String(),
+      if (messageId != null) 'message_id': messageId,
     };
   }
 }

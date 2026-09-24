@@ -1,5 +1,13 @@
 ## Unreleased
 
+### Added
+
+* **Schema 2 fields on every request:** `message_id` per event and per
+  identify, `anonymous_id` (the device's `anon_` id, kept after identify,
+  renewed on reset), `sent_at`, and a `context` object with the library,
+  device, OS, app and locale. `IForeventsAPIConfig.eventContext` overrides
+  the context.
+
 ### Changed
 
 * **Batching defaults: 20 events or 10 seconds** (were 10 and 5).
