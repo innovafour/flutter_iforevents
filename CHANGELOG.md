@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Core: every ingest request carries the fields of schema 2 of the
+  IForevents events bus: a `message_id` per event and per identify,
+  `anonymous_id` (the device's `anon_` id, now kept under
+  `iforevents_anonymous_id` after identify and renewed on reset), `sent_at`,
+  and a `context` object (library, device type and model, OS, app, locale;
+  `IForeventsAPIConfig.eventContext` overrides it). No hardware device id is
+  sent. APIs that predate these fields ignore them.
+
 ### Changed
 
 - Core: batching defaults are 20 events or 10 seconds (were 10 and 5): up
