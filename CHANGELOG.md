@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Core: batching defaults are 20 events or 10 seconds (were 10 and 5): up
+  to half the requests for the same traffic.
+- Core: identify traits and device data go once, with identify, and are no
+  longer copied into every later track event. Every backend keeps them on
+  the user's profile; copying them made each event carry and store the
+  same traits, personal data included, again. An empty public or device IP
+  is no longer sent as a trait.
+
 ## [0.2.0] - 2026-09-13
 
 ### Added
