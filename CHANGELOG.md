@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Core: heatmaps. `IforeventsHeatmap` (wrap the app in `MaterialApp.builder`)
+  records taps with the widget tapped (a short path of widget types, its
+  key and text), rage taps (three or more within 0.8 s on one spot), dead
+  taps (a tap on something that does not react to taps), how far down each
+  screen was scrolled, time on screen and how long each 5% band of a
+  scrolling screen was visible. Batches go to `POST /v1/events/heatmap`
+  every 15 seconds, on screen changes and when the app is paused, and are
+  shown in the dashboard under Heatmaps. `IforeventsRouteObserver` names
+  the screens. Options: `sampleRate`, `maskText`, `enabled`.
+
 - Core: every ingest request carries the fields of schema 2 of the
   IForevents events bus: a `message_id` per event and per identify,
   `anonymous_id` (the device's `anon_` id, now kept under

@@ -661,6 +661,28 @@ class IForeventsAPIIntegration extends Integration {
     }
   }
 
+  /// Sends one screen view's heatmap interactions to
+  /// `POST /v1/events/heatmap` (see [IforeventsHeatmap]). Heatmaps are a
+  /// sample: a failed send is dropped, not retried or queued.
+  Future<void> sendHeatmap(Map<String, dynamic> payload) async {
+    if (_userId == null) return;
+    try {
+      await _dio.post(
+        '/events/heatmap',
+        data: payload,
+        options: Options(extra: {'retry_count': config.maxRetries}),
+      );
+    } catch (e) {
+      if (config.enableLogging) {
+        developer.log(
+          'Failed to send heatmap batch',
+          name: 'IForeventsAPI',
+          error: e,
+        );
+      }
+    }
+  }
+
   Future<void> _sendSingleEvent(IForeventsQueuedEvent eventData) async {
     try {
       await _dio.post(
