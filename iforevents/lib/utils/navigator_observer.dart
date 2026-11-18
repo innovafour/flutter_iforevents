@@ -32,6 +32,11 @@ class IforeventsRouteObserver extends RouteObserver<PageRoute<dynamic>> {
     RouteSettings? from,
     RouteSettings? to,
   }) {
+    // Heatmaps are grouped by screen: the route now on top.
+    final screen = to?.name;
+    if (screen != null && screen.isNotEmpty) {
+      IforeventsHeatmap.currentScreen = screen;
+    }
     try {
       iforevents.pageViewed(
         event: PageViewEvent(

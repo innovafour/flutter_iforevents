@@ -23,6 +23,7 @@ import 'utils/web_storage_stub.dart'
 export 'package:iforevents/integration/_integration.dart';
 export 'package:iforevents/integration/iforevents.dart';
 export 'package:iforevents/models/errors.dart';
+export 'package:iforevents/heatmap/iforevents_heatmap.dart';
 export 'package:iforevents/utils/attribution.dart'
     show attributionFromUri, attributionFromQuery, utmKeys, clickIdKeys;
 

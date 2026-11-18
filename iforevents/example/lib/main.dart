@@ -109,6 +109,8 @@ class _MyAppState extends State<MyApp> {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       navigatorObservers: [IforeventsRouteObserver(iforevents: iforevents)],
+      // Heatmaps of every screen: taps, rage and dead taps, scroll depth.
+      builder: (context, child) => IforeventsHeatmap(child: child!),
       initialRoute: '/',
       routes: {
         '/': (context) => HomeScreen(iforevents: iforevents),
