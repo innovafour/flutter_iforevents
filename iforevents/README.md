@@ -212,6 +212,29 @@ MaterialApp(
 )
 ```
 
+### Heatmaps
+
+Wrap the app once and keep the route observer: every screen gets a tap
+heatmap, rage and dead taps, scroll depth and attention per 5% band, in the
+dashboard under **Heatmaps**.
+
+```dart
+MaterialApp(
+  navigatorObservers: [IforeventsRouteObserver(iforevents: iforevents)],
+  builder: (context, child) => IforeventsHeatmap(
+    sampleRate: 1.0,   // share of screen views recorded
+    maskText: false,   // true: never send the tapped widget's text
+    child: child!,
+  ),
+);
+```
+
+Screens are named by the route's name; apps without named routes set
+`IforeventsHeatmap.currentScreen = 'Checkout'` themselves. The tapped widget
+is described by its type, its `ValueKey<String>` and its text, so give
+important buttons a key (`ValueKey('buy')`). Typed text and field values
+are never recorded. Builds with `--obfuscate` lose the widget type names.
+
 ### Reset User Data
 
 Reset user identification and clear stored data:
