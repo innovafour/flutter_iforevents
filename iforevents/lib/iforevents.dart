@@ -12,6 +12,7 @@ import 'package:iforevents/models/pending_event.dart';
 import 'package:iforevents/services/event_storage_service.dart';
 import 'package:iforevents/services/background_processor.dart';
 import 'package:iforevents/config/retry_config.dart';
+import 'package:iforevents/utils/attribution.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:uuid/uuid.dart';
 
@@ -22,6 +23,8 @@ import 'utils/web_storage_stub.dart'
 export 'package:iforevents/integration/_integration.dart';
 export 'package:iforevents/integration/iforevents.dart';
 export 'package:iforevents/models/errors.dart';
+export 'package:iforevents/utils/attribution.dart'
+    show attributionFromUri, attributionFromQuery, utmKeys, clickIdKeys;
 
 /// A class for managing mobile shared events.
 class Iforevents {
@@ -29,6 +32,9 @@ class Iforevents {
   const Iforevents();
 
   static Device? _deviceData;
+
+  /// The session attribution attached to every event (see [trackDeepLink]).
+  static final AttributionTracker _attribution = AttributionTracker();
   static bool _isInitialized = false;
 
   /// Configurable retry intervals
@@ -120,7 +126,7 @@ class Iforevents {
       // The identify traits and device data went once, with identify; every
       // backend keeps them on the profile, so events carry only their own.
       final processedEvent = event.copyWith(
-        properties: flattenMap(event.properties),
+        properties: flattenMap(_attribution.apply(event.properties)),
       );
 
       final results = await IntegrationFactory.track(event: processedEvent);
@@ -140,6 +146,31 @@ class Iforevents {
     }
   }
 
+  /// Records an opened deep link or universal link: sends
+  /// `deep_link_opened` with the URL and starts the session attribution
+  /// from its utm parameters and click ids, attached to every event until
+  /// 30 minutes pass without one. Call it with the initial link and with
+  /// every link the app receives while running (app_links, uni_links,
+  /// go_router's redirect, ...).
+  Future<void> trackDeepLink(
+    Uri uri, {
+    Map<String, dynamic> properties = const {},
+  }) async {
+    _attribution.touch(attributionFromUri(uri));
+    await track(
+      event: TrackEvent(
+        eventName: 'deep_link_opened',
+        properties: {'url': uri.toString(), ...properties},
+      ),
+    );
+  }
+
+  /// Sets the session attribution yourself, e.g. from the Play install
+  /// referrer: `setAttribution(attributionFromQuery(referrer))`.
+  void setAttribution(Map<String, String> attribution) {
+    _attribution.touch(attribution);
+  }
+
   Future<void> reset() async {
     try {
       if (!_isInitialized) {
@@ -147,6 +178,7 @@ class Iforevents {
         return;
       }
 
+      _attribution.clear();
       final results = await IntegrationFactory.reset();
 
       // Log errors if any
@@ -168,13 +200,16 @@ class Iforevents {
         return;
       }
 
-      final results = await IntegrationFactory.pageViewed(event: event);
+      final attributed = event.copyWith(
+        properties: _attribution.apply(event.properties),
+      );
+      final results = await IntegrationFactory.pageViewed(event: attributed);
 
       // Process results and handle failures
       await _handleIntegrationResults(
         results,
         PendingEvent.fromPageViewEvent(
-          event,
+          attributed,
           'base_event', // Will be updated with the real integration name in _handleIntegrationResults
           retryIntervalSeconds: retryIntervals[0],
         ),

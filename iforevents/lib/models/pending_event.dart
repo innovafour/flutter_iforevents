@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:iforevents/models/event.dart';
 import 'package:iforevents/models/identify.dart';
 import 'package:iforevents/models/pageview.dart';
+
 import '../config/retry_config.dart';
 
 enum PendingEventType { track, identify, pageView }
@@ -93,6 +94,7 @@ class PendingEvent extends Equatable {
           previousRoute: eventData['previousRoute'] != null
               ? RouteSettings(name: eventData['previousRoute'] as String)
               : null,
+          properties: Map<String, dynamic>.from(eventData['properties'] ?? {}),
         );
     }
   }
@@ -148,6 +150,7 @@ class PendingEvent extends Equatable {
         'navigationType': event.navigationType,
         'toRoute': event.toRoute?.name,
         'previousRoute': event.previousRoute?.name,
+        if (event.properties.isNotEmpty) 'properties': event.properties,
       },
       integrationName: integrationName,
       lastAttempt: DateTime.now(),
